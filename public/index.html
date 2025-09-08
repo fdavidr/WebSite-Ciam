@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotizaciones y Notas de Venta</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="app.js"></script>
+  <!-- Firebase -->
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body>
+  <header id="company-info">
+    <div class="logo-section">
+      <img id="company-logo" alt="Logo" />
+      <input type="file" id="logo-input" hidden />
+      <button id="btn-logo">Cargar logo</button>
+    </div>
+    <div class="company-text">
+      <h1 id="company-name"></h1>
+      <p id="company-slogan"></p>
+      <p>N° Cotización: <span id="quote-number">-</span></p>
+    </div>
+  </header>
+
+  <section id="client-section">
+    <h2>Datos del Cliente</h2>
+    <select id="client-select"></select>
+    <button id="client-action">Agregar cliente</button>
+    <div id="client-form" class="modal hidden">
+      <div class="modal-content">
+        <label>Nombre<input id="client-name" required></label>
+        <label>Teléfono<input id="client-phone"></label>
+        <label>CI/CNIT<input id="client-id"></label>
+        <label>Empresa<input id="client-company"></label>
+        <button id="client-save">Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="seller-section">
+    <h2>Datos del Vendedor</h2>
+    <select id="seller-select"></select>
+    <button id="seller-action">Agregar vendedor</button>
+    <div id="seller-form" class="modal hidden">
+      <div class="modal-content">
+        <label>Nombre<input id="seller-name" required></label>
+        <label>Celular<input id="seller-phone"></label>
+        <button id="seller-save">Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="products-section">
+    <h2>Productos</h2>
+    <select id="product-select"></select>
+    <button id="product-add">Agregar</button>
+    <button id="product-action">Nuevo producto</button>
+    <table id="product-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Precio Unitario</th>
+          <th>Descuento</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="product-form" class="modal hidden">
+      <div class="modal-content">
+        <label>Código<input id="prod-code"></label>
+        <label>Descripción<input id="prod-desc"></label>
+        <label>Precio<input id="prod-price" type="number"></label>
+        <label>Imagen<input type="file" id="prod-image"></label>
+        <button id="prod-save">Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="totals-section">
+    <h2>Totales</h2>
+    <p>Subtotal: <span id="subtotal">0</span></p>
+    <p>Descuento: <span id="discount">0</span></p>
+    <p>Total: <span id="total">0</span></p>
+  </section>
+
+  <section id="terms-section">
+    <h2>Términos y Condiciones</h2>
+    <textarea id="term1" rows="2">Pago al contado.</textarea>
+    <textarea id="term2" rows="2">Válido por 7 días.</textarea>
+    <textarea id="term3" rows="2">Entrega inmediata.</textarea>
+    <textarea id="term4" rows="2">Garantía de 1 año.</textarea>
+  </section>
+
+  <button id="generate-pdf">Generar PDF</button>
+</body>
+</html>
