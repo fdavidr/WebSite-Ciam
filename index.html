@@ -114,7 +114,7 @@
       flex-direction: column;
       align-items: center;
       padding: 3.5rem 4rem 3rem;
-      background: linear-gradient(160deg, rgba(90, 90, 90, 0.94) 0%, rgba(10,10,10,.98) 100%);
+      background: linear-gradient(160deg, rgba(151, 38, 251, 0.94) 0%, rgba(60, 1, 112, 0.98) 100%);
       border: 1px solid rgba(255,255,255,.15);
       border-radius: 24px;
       box-shadow:
@@ -188,8 +188,9 @@
       height: auto;
       margin: 0 auto .4rem;
       filter:
-        drop-shadow(0 0 10px rgba(255,255,255,.30))
-        drop-shadow(0 0 22px rgba(180,180,180,.20));
+        brightness(0) invert(1)
+        drop-shadow(0 0 10px rgba(255,255,255,.35))
+        drop-shadow(0 0 22px rgba(255,255,255,.20));
     }
     .logo {
       display: block;
@@ -411,9 +412,9 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(10,4,24,.88);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: linear-gradient(160deg, rgba(151,38,251,.97) 0%, rgba(60,1,112,.98) 100%);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -427,8 +428,8 @@
 
     .modal {
       position: relative;
-      background: linear-gradient(160deg, rgba(18,8,40,.98) 0%, rgba(13,7,32,1) 100%);
-      border: 1px solid rgba(167,139,250,.25);
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.22);
       border-radius: 18px;
       padding: 2.2rem 2.5rem 2rem;
       max-width: 440px;
@@ -436,9 +437,8 @@
       max-height: 90vh;
       overflow-y: auto;
       box-shadow:
-        0 8px 48px rgba(0,0,0,.65),
-        0 0 60px rgba(124,58,237,.12),
-        inset 0 1px 0 rgba(255,255,255,.04);
+        0 8px 48px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.10);
       animation: modalIn .3s cubic-bezier(.22,1,.36,1) both;
     }
     @keyframes modalIn {
@@ -476,8 +476,8 @@
     }
 
     .branch-card {
-      background: rgba(124,58,237,.05);
-      border: 1px solid rgba(167,139,250,.18);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
       border-radius: 12px;
       padding: 1.2rem 1.4rem;
     }
@@ -487,7 +487,7 @@
       font-size: .82rem;
       font-weight: 700;
       letter-spacing: .15em;
-      color: var(--lilac);
+      color: rgba(255,255,255,.9);
       text-transform: uppercase;
       margin-bottom: 1rem;
       display: flex;
@@ -501,7 +501,7 @@
       gap: .65rem;
       margin-bottom: .75rem;
       font-size: .93rem;
-      color: var(--white);
+      color: rgba(255,255,255,.88);
       line-height: 1.5;
     }
     .branch-row:last-child { margin-bottom: 0; }
@@ -509,21 +509,21 @@
       flex-shrink: 0;
       width: 18px; height: 18px;
       margin-top: 2px;
-      fill: var(--lilac);
+      fill: rgba(255,255,255,.75);
     }
     .branch-row a {
-      color: var(--rose);
+      color: rgba(255,255,255,.95);
       text-decoration: none;
-      border-bottom: 1px solid rgba(232,121,249,.3);
+      border-bottom: 1px solid rgba(255,255,255,.35);
       transition: color .2s, border-color .2s;
     }
-    .branch-row a:hover { color: var(--rose2); border-color: var(--rose2); }
+    .branch-row a:hover { color: #ffffff; border-color: #ffffff; }
 
     .branch-divider {
       width: 100%;
       height: 1px;
       margin: .8rem 0;
-      background: linear-gradient(90deg, transparent, rgba(167,139,250,.25), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
     }
 
     .badge {
