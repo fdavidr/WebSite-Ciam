@@ -1,12 +1,890 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hola mundo</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIAM – Importación y Venta de Herramientas de Limpieza en Bolivia</title>
+  <meta name="description" content="CIAM Bolivia – Importadora y distribuidora de herramientas de limpieza industrial y comercial. Sucursales en Cochabamba y Santa Cruz." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --deep:     #ffffff;
+      --purple:   #7e7c7c;
+      --lilac:    #555555;
+      --lavender: #b0b0b0;
+      --violet:   #f5f5f5;
+      --rose:     #ffffff;
+      --rose2:    #cccccc;
+      --white:    #f5f5f5;
+      --muted:    #888888;
+      --glow-l:   rgba(255,255,255,.35);
+      --glow-v:   rgba(200,200,200,.25);
+      --glow-r:   rgba(255,255,255,.45);
+    }
+
+    /* ── BASE ── */
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--deep);
+      font-family: 'Open Sans', sans-serif;
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ── WAVE CONTAINER ── */
+    .wave-container {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 100%; height: 160px;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .wave {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 200%; height: 100%;
+    }
+    .wave1 { fill: rgba(80,80,80,.25);  animation: waveMove  9s linear infinite; }
+    .wave2 { fill: rgba(140,140,140,.12); animation: waveMove 13s linear infinite reverse; }
+    .wave3 { fill: rgba(200,200,200,.07); animation: waveMove 18s linear infinite; }
+    @keyframes waveMove {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── BACKGROUND GRADIENT ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(80,80,80,.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(140,140,140,.14) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,255,255,.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      animation: bgShift 12s ease-in-out infinite alternate;
+    }
+    @keyframes bgShift {
+      from { opacity: .7; }
+      to   { opacity: 1; }
+    }
+
+    /* Diagonal stripes — subtle */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(180,180,180,.03) 0px,
+        rgba(180,180,180,.03) 1px,
+        transparent 1px,
+        transparent 36px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── CANVAS BUBBLES ── */
+    canvas#bubbles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ── CARD ── */
+    .card {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3.5rem 4rem 3rem;
+      background: linear-gradient(160deg, rgba(90, 90, 90, 0.94) 0%, rgba(10,10,10,.98) 100%);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 24px;
+      box-shadow:
+        0 4px 32px rgba(0,0,0,.7),
+        0 0 60px rgba(255,255,255,.06),
+        inset 0 1px 0 rgba(255,255,255,.08);
+      max-width: 600px;
+      width: 90vw;
+      animation: cardIn .9s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(40px) scale(.96); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+
+    /* Rose corner accents */
+    .card .corner { position: absolute; width: 20px; height: 20px; }
+    .card .corner-tl { top: -1px;    left: -1px;    border-top: 2px solid var(--rose); border-left: 2px solid var(--rose); border-radius: 6px 0 0 0; }
+    .card .corner-tr { top: -1px;    right: -1px;   border-top: 2px solid var(--rose); border-right: 2px solid var(--rose); border-radius: 0 6px 0 0; }
+    .card .corner-bl { bottom: -1px; left: -1px;    border-bottom: 2px solid var(--rose); border-left: 2px solid var(--rose); border-radius: 0 0 0 6px; }
+    .card .corner-br { bottom: -1px; right: -1px;   border-bottom: 2px solid var(--rose); border-right: 2px solid var(--rose); border-radius: 0 0 6px 0; }
+
+    /* ── LOGO ── */
+    .logo-sup {
+      display: block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--violet);
+      opacity: .9;
+      margin-bottom: .25rem;
+      text-align: center;
+    }
+    .logo-sub {
+      display: block;
+      font-family: 'Open Sans', sans-serif;
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--lavender);
+      opacity: .85;
+      margin-top: .3rem;
+      text-align: center;
+    }
+    .logo-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: .6rem;
+    }
+
+    /* Glow pulse */
+    .logo-glow {
+      position: absolute;
+      inset: -32px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.12) 0%, rgba(100,100,100,.08) 50%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1);    opacity: .7; }
+      50%       { transform: scale(1.18); opacity: 1; }
+    }
+
+    .logo-img {
+      display: block;
+      width: clamp(100px, 22vw, 150px);
+      height: auto;
+      margin: 0 auto .4rem;
+      filter:
+        drop-shadow(0 0 10px rgba(255,255,255,.30))
+        drop-shadow(0 0 22px rgba(180,180,180,.20));
+    }
+    .logo {
+      display: block;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: clamp(4rem, 13vw, 6.5rem);
+      letter-spacing: .1em;
+      line-height: 1;
+      position: relative;
+      background: linear-gradient(
+        165deg,
+        #ffffff   0%,
+        #d0d0d0  18%,
+        #888888  34%,
+        #ffffff  50%,
+        #cccccc  62%,
+        #aaaaaa  76%,
+        #eeeeee  90%,
+        #ffffff  100%
+      );
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 16px var(--glow-r)) drop-shadow(0 0 32px var(--glow-l));
+      animation: gradientMove 6s ease-in-out infinite alternate;
+      user-select: none;
+    }
+    @keyframes gradientMove {
+      from { background-position:   0%   0%; }
+      to   { background-position: 100% 100%; }
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 85%;
+      height: 1px;
+      margin: 1.2rem 0 1rem;
+      background: linear-gradient(90deg, transparent, var(--rose), var(--lilac), var(--rose), transparent);
+      animation: dividerGlow 3s ease-in-out infinite;
+    }
+    @keyframes dividerGlow {
+      0%,100% { opacity: .5; }
+      50%      { opacity: 1; box-shadow: 0 0 12px var(--rose); }
+    }
+
+    /* ── SLOGAN ── */
+    .slogan {
+      font-family: 'Open Sans', sans-serif;
+      font-weight: 600;
+      font-size: clamp(.9rem, 3.2vw, 1.2rem);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--violet);
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp .8s ease .7s forwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .slogan-wrap {
+      position: relative;
+      overflow: hidden;
+      padding: 0 4px;
+    }
+    .slogan-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 55%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(232,121,249,.18), transparent);
+      animation: scan 5s linear infinite 2s;
+    }
+    @keyframes scan { to { left: 160%; } }
+
+    /* ── SUBTITLE ── */
+    .subtitle {
+      font-family: 'Open Sans', sans-serif;
+      font-weight: 600;
+      font-size: clamp(.65rem, 2vw, .82rem);
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: rgba(196,181,253,.5);
+      text-align: center;
+      margin-top: .45rem;
+      opacity: 0;
+      animation: fadeUp .8s ease .95s forwards;
+    }
+
+    /* ── TAGS (decorative) ── */
+    .tags {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+      opacity: 0;
+      animation: fadeUp .8s ease 1.05s forwards;
+    }
+    .tag {
+      font-size: .62rem;
+      font-family: 'Open Sans', sans-serif;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      border: 1px solid rgba(167,139,250,.3);
+      color: var(--lilac);
+      background: rgba(167,139,250,.07);
+    }
+    .tag-gold {
+      border-color: rgba(232,121,249,.35);
+      color: var(--rose);
+      background: rgba(232,121,249,.07);
+    }
+
+    /* ── BUTTONS ── */
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp .8s ease 1.2s forwards;
+    }
+
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .78rem 1.6rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+      border: 1px solid rgba(167,139,250,.4);
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(124,58,237,.15) 0%, rgba(167,139,250,.07) 100%);
+      cursor: pointer;
+      overflow: hidden;
+      transition: color .25s, border-color .25s, box-shadow .25s, transform .2s;
+      white-space: nowrap;
+    }
+    .btn svg { width: 16px; height: 16px; flex-shrink: 0; fill: currentColor; }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,.28), rgba(167,139,250,.22));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .3s ease;
+      z-index: 0;
+    }
+    .btn:hover::before { transform: scaleX(1); }
+    .btn > * { position: relative; z-index: 1; }
+
+    .btn:hover {
+      color: #fff;
+      border-color: var(--lavender);
+      box-shadow: 0 0 20px rgba(167,139,250,.35), 0 0 40px rgba(124,58,237,.2);
+      transform: translateY(-2px);
+    }
+    .btn:active { transform: translateY(0) scale(.97); }
+
+    .btn-whatsapp {
+      border-color: rgba(37,211,102,.4);
+      background: linear-gradient(135deg, rgba(37,211,102,.1), rgba(0,200,80,.05));
+    }
+    .btn-whatsapp::before { background: linear-gradient(135deg, rgba(37,211,102,.22), rgba(0,200,80,.16)); }
+    .btn-whatsapp:hover { border-color: #25d366; box-shadow: 0 0 20px rgba(37,211,102,.35), 0 0 40px rgba(0,200,80,.12); }
+
+    .btn-catalog {
+      border-color: rgba(232,121,249,.4);
+      background: linear-gradient(135deg, rgba(232,121,249,.1), rgba(200,0,240,.05));
+    }
+    .btn-catalog::before { background: linear-gradient(135deg, rgba(232,121,249,.22), rgba(200,0,240,.16)); }
+    .btn-catalog:hover { border-color: var(--rose); box-shadow: 0 0 20px rgba(232,121,249,.38), 0 0 40px rgba(200,0,240,.15); }
+
+    .btn-ofertas {
+      border-color: rgba(250,180,80,.45);
+      background: linear-gradient(135deg, rgba(250,180,80,.12), rgba(255,120,0,.06));
+    }
+    .btn-ofertas::before { background: linear-gradient(135deg, rgba(250,200,80,.25), rgba(255,140,0,.18)); }
+    .btn-ofertas:hover { border-color: #f8b400; box-shadow: 0 0 20px rgba(250,180,80,.45), 0 0 40px rgba(255,140,0,.18); }
+
+    /* ── FOOTER ── */
+    .footer {
+      position: fixed;
+      bottom: 1.1rem;
+      font-size: .68rem;
+      letter-spacing: .14em;
+      color: rgba(169,144,216,.3);
+      text-transform: uppercase;
+      z-index: 4;
+      text-align: center;
+      animation: fadeUp .8s ease 1.7s both;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .card { padding: 2.5rem 1.5rem 2rem; }
+      .buttons { gap: .7rem; }
+      .btn { padding: .7rem 1.1rem; font-size: .63rem; }
+    }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,4,24,.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      position: relative;
+      background: linear-gradient(160deg, rgba(18,8,40,.98) 0%, rgba(13,7,32,1) 100%);
+      border: 1px solid rgba(167,139,250,.25);
+      border-radius: 18px;
+      padding: 2.2rem 2.5rem 2rem;
+      max-width: 440px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow:
+        0 8px 48px rgba(0,0,0,.65),
+        0 0 60px rgba(124,58,237,.12),
+        inset 0 1px 0 rgba(255,255,255,.04);
+      animation: modalIn .3s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(30px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal .corner { position: absolute; width: 16px; height: 16px; }
+    .modal .corner-tl { top: -1px;    left: -1px;    border-top: 2px solid var(--rose); border-left: 2px solid var(--rose); border-radius: 5px 0 0 0; }
+    .modal .corner-br { bottom: -1px; right: -1px;   border-bottom: 2px solid var(--rose); border-right: 2px solid var(--rose); border-radius: 0 0 5px 0; }
+
+    .modal-close {
+      position: absolute;
+      top: .9rem; right: 1rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color .2s, transform .2s;
+      padding: 0;
+    }
+    .modal-close:hover { color: var(--rose); transform: rotate(90deg); }
+
+    .modal-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      color: var(--rose);
+      text-transform: uppercase;
+      margin-bottom: 1.3rem;
+      text-align: center;
+    }
+
+    .branch-card {
+      background: rgba(124,58,237,.05);
+      border: 1px solid rgba(167,139,250,.18);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .branch-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .15em;
+      color: var(--lilac);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .branch-row {
+      display: flex;
+      align-items: flex-start;
+      gap: .65rem;
+      margin-bottom: .75rem;
+      font-size: .93rem;
+      color: var(--white);
+      line-height: 1.5;
+    }
+    .branch-row:last-child { margin-bottom: 0; }
+    .branch-row .icon {
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      margin-top: 2px;
+      fill: var(--lilac);
+    }
+    .branch-row a {
+      color: var(--rose);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(232,121,249,.3);
+      transition: color .2s, border-color .2s;
+    }
+    .branch-row a:hover { color: var(--rose2); border-color: var(--rose2); }
+
+    .branch-divider {
+      width: 100%;
+      height: 1px;
+      margin: .8rem 0;
+      background: linear-gradient(90deg, transparent, rgba(167,139,250,.25), transparent);
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(37,211,102,.1);
+      border: 1px solid rgba(37,211,102,.3);
+      color: #25d366;
+      border-radius: 5px;
+      font-size: .72rem;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: .08em;
+      padding: .15rem .45rem;
+      margin-left: .3rem;
+    }
+
+    /* ── CATALOG MODAL ── */
+    .catalog-iframe-wrap {
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(167,139,250,.2);
+      background: rgba(124,58,237,.04);
+    }
+    .catalog-iframe-wrap iframe {
+      width: 100%;
+      height: 65vh;
+      border: none;
+      display: block;
+    }
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: 1rem;
+      width: 100%;
+      justify-content: center;
+      padding: .75rem 1.5rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--deep);
+      background: linear-gradient(135deg, var(--lilac), var(--rose));
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+    }
+    .btn-download svg { width: 16px; height: 16px; fill: currentColor; }
+    .btn-download:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 0 24px rgba(232,121,249,.4); }
+    .btn-download:active { transform: translateY(0) scale(.97); }
+  </style>
 </head>
 <body>
-    <h2 style="color: aquamarine; background-color: blueviolet; text-align: center;">lus clarita</h2>
+
+  <canvas id="bubbles"></canvas>
+
+  <!-- ── WAVES ── -->
+  <div class="wave-container" aria-hidden="true">
+    <svg class="wave wave1" viewBox="0 0 2880 130" preserveAspectRatio="none">
+      <path d="M0,65 C240,110 480,20 720,65 C960,110 1200,20 1440,65 C1680,110 1920,20 2160,65 C2400,110 2640,20 2880,65 L2880,130 L0,130 Z"/>
+    </svg>
+    <svg class="wave wave2" viewBox="0 0 2880 130" preserveAspectRatio="none">
+      <path d="M0,45 C360,95 720,5 1080,50 C1440,95 1800,10 2160,50 C2520,90 2700,25 2880,45 L2880,130 L0,130 Z"/>
+    </svg>
+    <svg class="wave wave3" viewBox="0 0 2880 130" preserveAspectRatio="none">
+      <path d="M0,80 C180,35 360,95 540,72 C720,50 900,95 1080,75 C1260,55 1440,88 1620,70 C1800,52 1980,88 2160,72 C2340,56 2520,84 2700,72 C2800,66 2850,78 2880,80 L2880,130 L0,130 Z"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <!-- Esquinas doradas -->
+    <span class="corner corner-tl"></span>
+    <span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span>
+    <span class="corner corner-br"></span>
+
+    <div class="logo-wrap">
+      <div class="logo-glow"></div>
+      <img src="logo.svg" alt="Logo CIAM" class="logo-img">
+      <span class="logo-sup">Importadora</span>
+      <span class="logo">CIAM</span>
+      <span class="logo-sub">Equipos de limpieza industrial</span>
+    </div>
+
+    <div class="buttons">
+      <!-- SUCURSALES -->
+      <a href="#" id="btn-sucursales" class="btn btn-branches">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
+        </svg>
+        Sucursales
+      </a>
+
+      <!-- WHATSAPP -->
+      <a href="https://wa.me/59176924727" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.5 3.5A12 12 0 0 0 3.5 20.5L2 22l1.5-1.5A12 12 0 1 0 20.5 3.5zM12 21a9 9 0 1 1 9-9 9 9 0 0 1-9 9zm5-6.5c-.3-.15-1.7-.84-1.96-.93s-.46-.15-.65.15-.75.93-.92 1.12-.34.22-.63.07a7.86 7.86 0 0 1-2.31-1.43 8.65 8.65 0 0 1-1.6-2c-.17-.3 0-.46.13-.6s.3-.34.44-.52a2 2 0 0 0 .3-.5.55.55 0 0 0 0-.52c-.07-.15-.65-1.56-.89-2.14s-.47-.48-.65-.49H8.5a1 1 0 0 0-.73.34A3.07 3.07 0 0 0 6.8 9.8a5.33 5.33 0 0 0 1.12 2.84 12.22 12.22 0 0 0 4.68 4.13c.65.28 1.16.45 1.55.57a3.73 3.73 0 0 0 1.72.11 2.82 2.82 0 0 0 1.84-1.3 2.27 2.27 0 0 0 .16-1.3c-.07-.12-.26-.19-.55-.34z"/>
+        </svg>
+        WhatsApp
+      </a>
+
+      <!-- CATÁLOGO -->
+      <a href="#" id="btn-catalogo" class="btn btn-catalog">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+        </svg>
+        Catálogo
+      </a>
+
+      <!-- OFERTAS -->
+      <a href="ofertas%20marzo.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-ofertas">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/>
+        </svg>
+        Ofertas
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── SUCURSALES MODAL ── -->
+  <div class="modal-overlay" id="modal-sucursales" role="dialog" aria-modal="true" aria-label="Sucursales">
+    <div class="modal">
+      <span class="corner corner-tl"></span>
+      <span class="corner corner-br"></span>
+      <button class="modal-close" id="modal-close" aria-label="Cerrar">&times;</button>
+      <p class="modal-title">Nuestras Sucursales</p>
+
+      <div class="branch-card">
+        <div class="branch-name">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          Cochabamba
+        </div>
+
+        <div class="branch-row">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          <span>
+            Calle Sucre #1948 &nbsp;
+            <a href="https://maps.app.goo.gl/t2bCfj5XDovuukgP7" target="_blank" rel="noopener noreferrer">Ver en mapa</a>
+          </span>
+        </div>
+
+        <div class="branch-divider"></div>
+
+        <div class="branch-row">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          <span>
+            <strong>Horario:</strong><br />
+            Lunes a viernes: 10am – 6pm<br />
+            Sábados: 9am – 2pm
+          </span>
+        </div>
+
+        <div class="branch-divider"></div>
+
+        <div class="branch-row">
+          <svg class="icon" viewBox="0 0 24 24" style="fill:#25d366"><path d="M20.5 3.5A12 12 0 0 0 3.5 20.5L2 22l1.5-1.5A12 12 0 1 0 20.5 3.5zM12 21a9 9 0 1 1 9-9 9 9 0 0 1-9 9zm5-6.5c-.3-.15-1.7-.84-1.96-.93s-.46-.15-.65.15-.75.93-.92 1.12-.34.22-.63.07a7.86 7.86 0 0 1-2.31-1.43 8.65 8.65 0 0 1-1.6-2c-.17-.3 0-.46.13-.6s.3-.34.44-.52a2 2 0 0 0 .3-.5.55.55 0 0 0 0-.52c-.07-.15-.65-1.56-.89-2.14s-.47-.48-.65-.49H8.5a1 1 0 0 0-.73.34A3.07 3.07 0 0 0 6.8 9.8a5.33 5.33 0 0 0 1.12 2.84 12.22 12.22 0 0 0 4.68 4.13c.65.28 1.16.45 1.55.57a3.73 3.73 0 0 0 1.72.11 2.82 2.82 0 0 0 1.84-1.3 2.27 2.27 0 0 0 .16-1.3c-.07-.12-.26-.19-.55-.34z"/></svg>
+          <span>
+            WhatsApp: <a href="https://wa.me/59176924727" target="_blank" rel="noopener noreferrer">76924727</a>
+            <span class="badge">+591</span>
+          </span>
+        </div>
+      </div>
+
+      <div style="height:.9rem;"></div>
+
+      <div class="branch-card">
+        <div class="branch-name">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          Santa Cruz
+        </div>
+
+        <div class="branch-row">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          <span>
+            Av. Mutualista y Bruno Racua &nbsp;
+            <a href="https://maps.app.goo.gl/uV4D7wNfLjd3mPgNA" target="_blank" rel="noopener noreferrer">Ver en mapa</a>
+          </span>
+        </div>
+
+        <div class="branch-divider"></div>
+
+        <div class="branch-row">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          <span>
+            <strong>Horario:</strong><br />
+            Lunes a viernes: 8:30am – 3:30pm<br />
+            Sábados: 8am – 1pm
+          </span>
+        </div>
+
+        <div class="branch-divider"></div>
+
+        <div class="branch-row">
+          <svg class="icon" viewBox="0 0 24 24" style="fill:#25d366"><path d="M20.5 3.5A12 12 0 0 0 3.5 20.5L2 22l1.5-1.5A12 12 0 1 0 20.5 3.5zM12 21a9 9 0 1 1 9-9 9 9 0 0 1-9 9zm5-6.5c-.3-.15-1.7-.84-1.96-.93s-.46-.15-.65.15-.75.93-.92 1.12-.34.22-.63.07a7.86 7.86 0 0 1-2.31-1.43 8.65 8.65 0 0 1-1.6-2c-.17-.3 0-.46.13-.6s.3-.34.44-.52a2 2 0 0 0 .3-.5.55.55 0 0 0 0-.52c-.07-.15-.65-1.56-.89-2.14s-.47-.48-.65-.49H8.5a1 1 0 0 0-.73.34A3.07 3.07 0 0 0 6.8 9.8a5.33 5.33 0 0 0 1.12 2.84 12.22 12.22 0 0 0 4.68 4.13c.65.28 1.16.45 1.55.57a3.73 3.73 0 0 0 1.72.11 2.82 2.82 0 0 0 1.84-1.3 2.27 2.27 0 0 0 .16-1.3c-.07-.12-.26-.19-.55-.34z"/></svg>
+          <span>
+            WhatsApp: <a href="https://wa.me/59173691496" target="_blank" rel="noopener noreferrer">73691496</a>
+            <span class="badge">+591</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CATÁLOGO MODAL ── -->
+  <div class="modal-overlay" id="modal-catalogo" role="dialog" aria-modal="true" aria-label="Catálogo">
+    <div class="modal" style="max-width:700px;">
+      <span class="corner corner-tl"></span>
+      <span class="corner corner-br"></span>
+      <button class="modal-close" id="modal-close-catalogo" aria-label="Cerrar">&times;</button>
+      <p class="modal-title">Catálogo de Productos</p>
+      <div class="catalog-iframe-wrap">
+        <iframe src="Catalogo%20Ciam%20(2).pdf" title="Catálogo CIAM"></iframe>
+      </div>
+      <a href="Catalogo%20Ciam%20(2).pdf" download="Catalogo-CIAM.pdf" class="btn-download">
+        <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
+        Descargar Catálogo PDF
+      </a>
+    </div>
+  </div>
+
+  <p class="footer">© 2026 CIAM &nbsp;·&nbsp; Importadora de Herramientas de Limpieza &nbsp;·&nbsp; Bolivia</p>
+
+  <!-- ── MODAL LOGIC ── -->
+  <script>
+    (function () {
+      const overlay  = document.getElementById('modal-sucursales');
+      const btnOpen  = document.getElementById('btn-sucursales');
+      const btnClose = document.getElementById('modal-close');
+
+      function openModal(e) {
+        e.preventDefault();
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      btnOpen.addEventListener('click', openModal);
+      btnClose.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+      });
+    })();
+
+    // ── Catalog modal ──
+    (function () {
+      const overlay  = document.getElementById('modal-catalogo');
+      const btnOpen  = document.getElementById('btn-catalogo');
+      const btnClose = document.getElementById('modal-close-catalogo');
+      function openModal(e) { e.preventDefault(); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+      function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+      btnOpen.addEventListener('click', openModal);
+      btnClose.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+    })();
+  </script>
+
+  <!-- ── SOAP BUBBLES ── -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('bubbles');
+      const ctx = canvas.getContext('2d');
+      let W, H, bubbles = [];
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      function randomBetween(a, b) { return a + Math.random() * (b - a); }
+
+      function Bubble() {
+        this.init = function () {
+          this.x     = randomBetween(0, W);
+          this.y     = randomBetween(H * 0.5, H + 80);
+          this.r     = randomBetween(4, 22);
+          this.vx    = randomBetween(-.3, .3);
+          this.vy    = randomBetween(-.35, -.9);
+          this.alpha = randomBetween(.05, .28);
+          this.wobble = Math.random() * Math.PI * 2;
+          this.wobbleSpeed = randomBetween(.01, .03);
+          // iridescent hue
+          const hues = [0, 0, 0, 0, 0, 0];
+          this.hue  = hues[Math.floor(Math.random() * hues.length)];
+          this.sat  = 0;
+        };
+        this.init();
+      }
+
+      function init(n) {
+        bubbles = [];
+        for (let i = 0; i < n; i++) {
+          const b = new Bubble();
+          // Spread initial positions all over screen, not just bottom
+          b.y = randomBetween(0, H);
+          bubbles.push(b);
+        }
+      }
+
+      function drawBubble(b) {
+        const x = b.x + Math.sin(b.wobble) * 2;
+        const y = b.y;
+
+        // Main bubble (transparent fill, colored rim)
+        ctx.beginPath();
+        ctx.arc(x, y, b.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(0, 0%, 75%, ${b.alpha * 1.6})`;
+        ctx.lineWidth = b.r > 12 ? 1.2 : .9;
+        ctx.stroke();
+
+        // Inner gloss highlight
+        ctx.beginPath();
+        ctx.arc(x - b.r * .28, y - b.r * .28, b.r * .2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${b.alpha * 1.2})`;
+        ctx.fill();
+
+        // Soft inner fill
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, b.r);
+        grad.addColorStop(0, `hsla(0, 0%, 85%, ${b.alpha * .4})`);
+        grad.addColorStop(1, `hsla(0, 0%, 70%, 0)`);
+        ctx.beginPath();
+        ctx.arc(x, y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        bubbles.forEach(b => {
+          drawBubble(b);
+          b.x      += b.vx;
+          b.y      += b.vy;
+          b.wobble += b.wobbleSpeed;
+
+          // Reset when leaves top or drifts too far sideways
+          if (b.y + b.r < -10 || b.x < -60 || b.x > W + 60) {
+            b.init();
+            b.y = H + b.r + 10;
+          }
+        });
+
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); init(55); });
+      resize();
+      init(55);
+      draw();
+    })();
+  </script>
+
 </body>
 </html>
