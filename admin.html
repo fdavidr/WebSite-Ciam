@@ -311,9 +311,11 @@
           </div>
 
           <div class="field">
-            <label>Vista previa de imagen</label>
-            <div class="img-preview" id="img-preview">
-              <span>📷 Ingresa una URL para previsualizar</span>
+            <label>Vista previa de imágenes</label>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;">
+              <div class="img-preview" id="img-preview1"><span>1</span></div>
+              <div class="img-preview" id="img-preview2"><span>2</span></div>
+              <div class="img-preview" id="img-preview3"><span>3</span></div>
             </div>
           </div>
 
@@ -429,10 +431,11 @@
     container.innerHTML = list.map(p => {
       const emoji = EMOJIS[p.category] || '📦';
       const isEditing = p.id === editingId;
+      const img0 = (p.images && p.images[0]) || p.image || '';
       return `
         <div class="product-row ${isEditing ? 'editing' : ''}" data-id="${p.id}">
           <div class="row-img">
-            ${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.parentElement.textContent='${emoji}'" />` : emoji}
+            ${img0 ? `<img src="${escapeHtml(img0)}" alt="${escapeHtml(p.name)}" onerror="this.parentElement.textContent='${emoji}'" />` : emoji}
           </div>
           <div class="row-info">
             <div class="row-name">${escapeHtml(p.name)}</div>
@@ -459,9 +462,11 @@
     document.getElementById('f-name').value  = '';
     document.getElementById('f-price').value = '';
     document.getElementById('f-category').value = '';
-    document.getElementById('f-image').value = '';
+    document.getElementById('f-image1').value = '';
+    document.getElementById('f-image2').value = '';
+    document.getElementById('f-image3').value = '';
     document.getElementById('f-desc').value  = '';
-    document.getElementById('img-preview').innerHTML = '<span>📷 Ingresa una URL para previsualizar</span>';
+    [1,2,3].forEach(n => { document.getElementById(`img-preview${n}`).innerHTML = `<span>${n}</span>`; });
     document.getElementById('form-mode-label').textContent = '➕ Agregar Producto';
     document.getElementById('btn-save').textContent = 'Guardar Producto';
     document.getElementById('btn-cancel').style.display = 'none';
@@ -471,27 +476,30 @@
   function loadForEdit(id) {
     const product = getProducts().find(p => p.id === id);
     if (!product) return;
+    const imgs = product.images || [product.image||'','',''];
     document.getElementById('edit-id').value     = product.id;
     document.getElementById('f-name').value      = product.name;
     document.getElementById('f-price').value     = product.price;
     document.getElementById('f-category').value  = product.category;
-    document.getElementById('f-image').value     = product.image || '';
+    document.getElementById('f-image1').value    = imgs[0] || '';
+    document.getElementById('f-image2').value    = imgs[1] || '';
+    document.getElementById('f-image3').value    = imgs[2] || '';
     document.getElementById('f-desc').value      = product.description || '';
     document.getElementById('form-mode-label').textContent = '✏️ Editar Producto';
     document.getElementById('btn-save').textContent = 'Actualizar Producto';
     document.getElementById('btn-cancel').style.display = 'inline-flex';
-    updateImagePreview(product.image || '');
+    [1,2,3].forEach(n => updateImagePreview(imgs[n-1]||'', n));
     renderList();
     document.getElementById('f-name').focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function updateImagePreview(url) {
-    const prev = document.getElementById('img-preview');
+  function updateImagePreview(url, n) {
+    const prev = document.getElementById(`img-preview${n}`);
     if (url && url.startsWith('http')) {
-      prev.innerHTML = `<img src="${escapeHtml(url)}" alt="preview" onerror="this.parentElement.innerHTML='<span>❌ No se pudo cargar la imagen</span>'" />`;
+      prev.innerHTML = `<img src="${escapeHtml(url)}" alt="preview ${n}" onerror="this.parentElement.innerHTML='<span>❌</span>'" />`;
     } else {
-      prev.innerHTML = '<span>📷 Ingresa una URL para previsualizar</span>';
+      prev.innerHTML = `<span>${n}</span>`;
     }
   }
 
@@ -512,18 +520,22 @@
     const name     = document.getElementById('f-name').value.trim();
     const price    = parseFloat(document.getElementById('f-price').value);
     const category = document.getElementById('f-category').value.trim();
-    const image    = document.getElementById('f-image').value.trim();
+    const images   = [
+      document.getElementById('f-image1').value.trim(),
+      document.getElementById('f-image2').value.trim(),
+      document.getElementById('f-image3').value.trim()
+    ];
     const desc     = document.getElementById('f-desc').value.trim();
 
     if (editId) {
       const idx = list.findIndex(p => p.id === Number(editId));
       if (idx !== -1) {
-        list[idx] = { ...list[idx], name, price, category, image, description: desc };
+        list[idx] = { ...list[idx], name, price, category, images, description: desc };
         saveProducts(list);
         showToast('✅ Producto actualizado');
       }
     } else {
-      list.push({ id: nextId(list), name, price, category, image, description: desc });
+      list.push({ id: nextId(list), name, price, category, images, description: desc });
       saveProducts(list);
       showToast('✅ Producto agregado');
     }
@@ -568,8 +580,10 @@
     if (e.target === this) closeConfirm();
   });
 
-  document.getElementById('f-image').addEventListener('input', function() {
-    updateImagePreview(this.value.trim());
+  [1,2,3].forEach(n => {
+    document.getElementById(`f-image${n}`).addEventListener('input', function() {
+      updateImagePreview(this.value.trim(), n);
+    });
   });
 
   document.getElementById('products-list').addEventListener('click', function(e) {
@@ -588,14 +602,12 @@
   // ─────────────────────────────────────────────
   function getDefaultProducts() {
     return [
-      { id: 1, name: 'Mopa Industrial 120cm',   category: 'Mopas',   price: 85,  description: 'Mopa de microfibra para pisos industriales. Alta absorción.',                        image: '' },
-      { id: 2, name: 'Carro de Limpieza Pro',   category: 'Carros',  price: 320, description: 'Carro de limpieza con escurridor de doble cubo. Ruedas antideslizantes.',             image: '' },
-      { id: 3, name: 'Escoba de Goma',          category: 'Escobas', price: 45,  description: 'Escoba de goma con mango telescópico. Ideal para agua y residuos.',                  image: '' },
-      { id: 4, name: 'Trapeador Giratório 360°',category: 'Mopas',   price: 120, description: 'Trapeador con mecanismo giratorio y cubo escurridor automático.',                     image: '' },
-      { id: 5, name: 'Balde Escurridor 20L',    category: 'Baldes',  price: 95,  description: 'Balde con escurridor de pedal. Capacidad 20 litros.',                                image: '' },
-      { id: 6, name: 'Difusor de Aromas',       category: 'Aromas',  price: 210, description: 'Difusor automático para espacios grandes. Recarga cada 30 días.',                    image: '' }
-    ];
-  }
+      { id:1, name:'Mopa Industrial 120cm',    category:'Mopas',   price:85,  description:'Mopa de microfibra para pisos industriales. Alta absorción.',            images:['','',''] },
+      { id:2, name:'Carro de Limpieza Pro',    category:'Carros',  price:320, description:'Carro con escurridor de doble cubo. Ruedas antideslizantes.',             images:['','',''] },
+      { id:3, name:'Escoba de Goma',           category:'Escobas', price:45,  description:'Escoba de goma con mango telescópico. Ideal para agua y residuos.',       images:['','',''] },
+      { id:4, name:'Trapeador Giratório 360°', category:'Mopas',   price:120, description:'Trapeador con mecanismo giratorio y cubo escurridor automático.',          images:['','',''] },
+      { id:5, name:'Balde Escurridor 20L',     category:'Baldes',  price:95,  description:'Balde con escurridor de pedal. Capacidad 20 litros.',                     images:['','',''] },
+      { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
 
   if (!localStorage.getItem(STORAGE_KEY)) {
     saveProducts(getDefaultProducts());
