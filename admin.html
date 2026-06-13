@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIAM – Panel Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f001f;
+      --panel: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.10);
+      --accent: #9726fb;
+      --accent2: #e879f9;
+      --green: #25d366;
+      --white: #f0f0f0;
+      --muted: #999;
+      --danger: #f87171;
+    }
+
+    body {
+      background: linear-gradient(160deg, #0f001f 0%, #2a0055 60%, #0f001f 100%);
+      min-height: 100vh;
+      font-family: 'Open Sans', sans-serif;
+      color: var(--white);
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,0,31,0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: .8rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .header-logo {
+      display: flex; align-items: center; gap: .7rem;
+      text-decoration: none;
+    }
+    .header-logo img { width: 34px; filter: brightness(0) invert(1); }
+    .header-logo span {
+      font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.3rem;
+      letter-spacing: .12em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .header-title {
+      font-family: 'Montserrat', sans-serif; font-size: .7rem; font-weight: 700;
+      letter-spacing: .2em; text-transform: uppercase; color: var(--accent2);
+    }
+    .header-links { display: flex; gap: .7rem; }
+    .btn-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem .9rem;
+      font-family: 'Montserrat', sans-serif; font-size: .65rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      transition: color .2s, border-color .2s;
+    }
+    .btn-link:hover { color: var(--white); border-color: rgba(255,255,255,0.3); }
+    .btn-link.primary {
+      color: var(--white);
+      background: linear-gradient(135deg, rgba(151,38,251,.3), rgba(232,121,249,.15));
+      border-color: rgba(151,38,251,.5);
+    }
+    .btn-link.primary:hover { box-shadow: 0 0 16px rgba(151,38,251,.4); border-color: var(--accent2); }
+
+    /* ── LAYOUT ── */
+    .layout { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; padding: 1.5rem; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .layout { padding: 1rem; gap: 1rem; } }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem;
+    }
+    @media (max-width: 500px) { .panel { padding: 1rem; } }
+    .panel-title {
+      font-family: 'Montserrat', sans-serif; font-size: .75rem; font-weight: 700;
+      letter-spacing: .2em; text-transform: uppercase; color: var(--accent2);
+      margin-bottom: 1.2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title span { color: var(--muted); font-weight: 400; font-size: .68rem; letter-spacing: .1em; }
+
+    /* ── FORM ── */
+    .form-grid { display: grid; gap: .9rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+    label { font-size: .75rem; color: var(--muted); font-weight: 600; letter-spacing: .05em; }
+    .field { display: flex; flex-direction: column; gap: .3rem; }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="url"],
+    textarea, select {
+      padding: .6rem .85rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--white); font-size: .88rem; font-family: 'Open Sans', sans-serif;
+      outline: none; transition: border-color .2s;
+      width: 100%;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 70px; }
+    select option { background: #1a003a; }
+
+    .img-preview {
+      width: 100%; border-radius: 10px; overflow: hidden;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed var(--border);
+      min-height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .78rem; color: var(--muted); text-align: center; gap: .4rem;
+      flex-direction: column;
+    }
+    .img-preview img { width: 100%; max-height: 130px; object-fit: cover; }
+
+    .form-actions { display: flex; gap: .7rem; margin-top: .4rem; }
+    .btn-primary {
+      flex: 1; padding: .7rem;
+      font-family: 'Montserrat', sans-serif; font-size: .72rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: #fff; cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 10px;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 0 18px rgba(151,38,251,.5); }
+    .btn-secondary {
+      padding: .7rem 1.2rem;
+      font-family: 'Montserrat', sans-serif; font-size: .72rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted); cursor: pointer;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px;
+      transition: color .2s, border-color .2s;
+    }
+    .btn-secondary:hover { color: var(--white); border-color: rgba(255,255,255,0.25); }
+
+    /* ── PRODUCTS TABLE ── */
+    .products-list { display: flex; flex-direction: column; gap: .7rem; }
+    .product-row {
+      display: flex; align-items: center; gap: .8rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: .7rem .9rem;
+      transition: border-color .2s;
+    }
+    .product-row:hover { border-color: rgba(151,38,251,.35); }
+    .product-row.editing { border-color: var(--accent2); background: rgba(232,121,249,.06); }
+    .row-img {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: rgba(255,255,255,.04); flex-shrink: 0;
+      overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+    }
+    .row-img img { width: 100%; height: 100%; object-fit: cover; }
+    .row-info { flex: 1; min-width: 0; }
+    .row-name { font-weight: 700; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-meta { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+    .row-price { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .9rem; white-space: nowrap; }
+    .row-actions { display: flex; gap: .4rem; }
+    .icon-btn {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: rgba(255,255,255,.07); border: 1px solid var(--border);
+      color: var(--muted); cursor: pointer; font-size: .82rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: color .2s, background .2s, border-color .2s;
+    }
+    .icon-btn:hover { color: var(--white); background: rgba(255,255,255,.14); }
+    .icon-btn.edit:hover { color: var(--accent2); border-color: var(--accent2); }
+    .icon-btn.del:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* ── STATS ── */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem;
+      margin-bottom: 1.2rem;
+    }
+    .stat-card {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 12px; padding: .8rem 1rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.4rem;
+      color: var(--accent2);
+    }
+    .stat-lbl { font-size: .63rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: .15rem; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: rgba(42,0,85,0.98); border: 1px solid rgba(232,121,249,.3);
+      border-radius: 10px; padding: .6rem 1.3rem;
+      font-size: .8rem; color: #fff; z-index: 999; pointer-events: none;
+      transition: transform .3s cubic-bezier(.22,1,.36,1), opacity .3s;
+      opacity: 0; white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ── CONFIRM DIALOG ── */
+    .confirm-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); z-index: 400;
+      align-items: center; justify-content: center;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+      background: #1a003a; border: 1px solid rgba(248,113,113,.35);
+      border-radius: 14px; padding: 1.8rem 2rem;
+      text-align: center; max-width: 320px; width: 90%;
+    }
+    .confirm-box h3 { font-family: 'Montserrat', sans-serif; font-size: .9rem; margin-bottom: .7rem; }
+    .confirm-box p { font-size: .82rem; color: var(--muted); margin-bottom: 1.3rem; }
+    .confirm-actions { display: flex; gap: .7rem; justify-content: center; }
+    .btn-danger {
+      padding: .6rem 1.4rem;
+      font-family: 'Montserrat', sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; cursor: pointer; border: none; border-radius: 9px;
+      background: linear-gradient(135deg, #ef4444, #f87171); color: #fff;
+      transition: opacity .2s;
+    }
+    .btn-danger:hover { opacity: .88; }
+    .btn-cancel {
+      padding: .6rem 1.4rem;
+      font-family: 'Montserrat', sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; cursor: pointer;
+      background: rgba(255,255,255,.07); border: 1px solid var(--border); border-radius: 9px; color: var(--muted);
+      transition: color .2s;
+    }
+    .btn-cancel:hover { color: var(--white); }
+
+    /* EMPTY */
+    .no-products { text-align: center; padding: 2rem; color: var(--muted); font-size: .85rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div style="display:flex; align-items:center; gap:.9rem;">
+      <a href="index.html" class="header-logo">
+        <img src="logo.svg" alt="CIAM" />
+        <span>CIAM</span>
+      </a>
+      <span class="header-title">Panel Admin</span>
+    </div>
+    <div class="header-links">
+      <a href="index.html" class="btn-link primary">
+        🛍 Ver Tienda
+      </a>
+      <a href="index.html" class="btn-link">← Inicio</a>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <div class="layout">
+
+    <!-- ── LEFT: FORM ── -->
+    <div>
+      <!-- Stats -->
+      <div class="stats-bar" id="stats-bar">
+        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Productos</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-cats">0</div><div class="stat-lbl">Categorías</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-avgprice">0</div><div class="stat-lbl">Precio Prom.</div></div>
+      </div>
+
+      <!-- Add/Edit form -->
+      <div class="panel">
+        <div class="panel-title">
+          <span id="form-mode-label">➕ Agregar Producto</span>
+        </div>
+
+        <div class="form-grid">
+          <input type="hidden" id="edit-id" value="" />
+
+          <div class="form-row">
+            <div class="field">
+              <label for="f-name">Nombre del producto *</label>
+              <input type="text" id="f-name" placeholder="Ej: Mopa Industrial 120cm" maxlength="80" />
+            </div>
+            <div class="field">
+              <label for="f-price">Precio (Bs) *</label>
+              <input type="number" id="f-price" placeholder="0.00" min="0" step="0.01" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="f-category">Categoría *</label>
+              <input type="text" id="f-category" placeholder="Ej: Mopas, Carros, Escobas…" maxlength="40" list="cat-suggestions" />
+              <datalist id="cat-suggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="f-image">URL de imagen</label>
+              <input type="url" id="f-image" placeholder="https://…" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-desc">Descripción</label>
+            <textarea id="f-desc" placeholder="Descripción breve del producto…" maxlength="300"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Vista previa de imagen</label>
+            <div class="img-preview" id="img-preview">
+              <span>📷 Ingresa una URL para previsualizar</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" id="btn-save">Guardar Producto</button>
+            <button class="btn-secondary" id="btn-cancel" style="display:none">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: PRODUCTS LIST ── -->
+    <div class="panel">
+      <div class="panel-title">
+        📦 Productos <span id="product-count-label">0 productos</span>
+      </div>
+
+      <div class="products-list" id="products-list">
+        <div class="no-products">Cargando productos…</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CONFIRM DELETE ── -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-box">
+      <h3>¿Eliminar producto?</h3>
+      <p id="confirm-msg">Esta acción no se puede deshacer.</p>
+      <div class="confirm-actions">
+        <button class="btn-danger" id="confirm-yes">Eliminar</button>
+        <button class="btn-cancel" id="confirm-no">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOAST ── -->
+  <div id="toast"></div>
+
+  <script>
+  const STORAGE_KEY = 'ciam_products';
+
+  // ─────────────────────────────────────────────
+  //  HELPERS
+  // ─────────────────────────────────────────────
+  function getProducts() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveProducts(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+
+  function nextId(list) {
+    return list.length === 0 ? 1 : Math.max(...list.map(p => p.id)) + 1;
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ─────────────────────────────────────────────
+  //  STATS
+  // ─────────────────────────────────────────────
+  function updateStats() {
+    const list = getProducts();
+    const cats = new Set(list.map(p => p.category)).size;
+    const avg  = list.length ? (list.reduce((s,p) => s + p.price, 0) / list.length).toFixed(0) : 0;
+    document.getElementById('stat-total').textContent  = list.length;
+    document.getElementById('stat-cats').textContent   = cats;
+    document.getElementById('stat-avgprice').textContent = `Bs ${avg}`;
+  }
+
+  // ─────────────────────────────────────────────
+  //  CATEGORY SUGGESTIONS
+  // ─────────────────────────────────────────────
+  function updateCatSuggestions() {
+    const list = getProducts();
+    const cats = [...new Set(list.map(p => p.category))].sort();
+    const dl = document.getElementById('cat-suggestions');
+    dl.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+  }
+
+  // ─────────────────────────────────────────────
+  //  RENDER LIST
+  // ─────────────────────────────────────────────
+  const EMOJIS = { 'Mopas':'🧹','Carros':'🛒','Escobas':'🧺','Baldes':'🪣','Aromas':'🌸' };
+
+  function renderList() {
+    const list = getProducts();
+    const container = document.getElementById('products-list');
+    const label = document.getElementById('product-count-label');
+    label.textContent = `${list.length} producto${list.length !== 1 ? 's' : ''}`;
+
+    if (list.length === 0) {
+      container.innerHTML = '<div class="no-products">No hay productos aún.<br>Agrega el primero desde el formulario.</div>';
+      return;
+    }
+
+    const editingId = document.getElementById('edit-id').value ? Number(document.getElementById('edit-id').value) : null;
+
+    container.innerHTML = list.map(p => {
+      const emoji = EMOJIS[p.category] || '📦';
+      const isEditing = p.id === editingId;
+      return `
+        <div class="product-row ${isEditing ? 'editing' : ''}" data-id="${p.id}">
+          <div class="row-img">
+            ${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.parentElement.textContent='${emoji}'" />` : emoji}
+          </div>
+          <div class="row-info">
+            <div class="row-name">${escapeHtml(p.name)}</div>
+            <div class="row-meta">${escapeHtml(p.category)}</div>
+          </div>
+          <div class="row-price">Bs ${Number(p.price).toFixed(2)}</div>
+          <div class="row-actions">
+            <button class="icon-btn edit" data-id="${p.id}" title="Editar">✏️</button>
+            <button class="icon-btn del"  data-id="${p.id}" title="Eliminar">🗑</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateStats();
+    updateCatSuggestions();
+  }
+
+  // ─────────────────────────────────────────────
+  //  FORM LOGIC
+  // ─────────────────────────────────────────────
+  function clearForm() {
+    document.getElementById('edit-id').value = '';
+    document.getElementById('f-name').value  = '';
+    document.getElementById('f-price').value = '';
+    document.getElementById('f-category').value = '';
+    document.getElementById('f-image').value = '';
+    document.getElementById('f-desc').value  = '';
+    document.getElementById('img-preview').innerHTML = '<span>📷 Ingresa una URL para previsualizar</span>';
+    document.getElementById('form-mode-label').textContent = '➕ Agregar Producto';
+    document.getElementById('btn-save').textContent = 'Guardar Producto';
+    document.getElementById('btn-cancel').style.display = 'none';
+    renderList();
+  }
+
+  function loadForEdit(id) {
+    const product = getProducts().find(p => p.id === id);
+    if (!product) return;
+    document.getElementById('edit-id').value     = product.id;
+    document.getElementById('f-name').value      = product.name;
+    document.getElementById('f-price').value     = product.price;
+    document.getElementById('f-category').value  = product.category;
+    document.getElementById('f-image').value     = product.image || '';
+    document.getElementById('f-desc').value      = product.description || '';
+    document.getElementById('form-mode-label').textContent = '✏️ Editar Producto';
+    document.getElementById('btn-save').textContent = 'Actualizar Producto';
+    document.getElementById('btn-cancel').style.display = 'inline-flex';
+    updateImagePreview(product.image || '');
+    renderList();
+    document.getElementById('f-name').focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateImagePreview(url) {
+    const prev = document.getElementById('img-preview');
+    if (url && url.startsWith('http')) {
+      prev.innerHTML = `<img src="${escapeHtml(url)}" alt="preview" onerror="this.parentElement.innerHTML='<span>❌ No se pudo cargar la imagen</span>'" />`;
+    } else {
+      prev.innerHTML = '<span>📷 Ingresa una URL para previsualizar</span>';
+    }
+  }
+
+  function validateForm() {
+    const name  = document.getElementById('f-name').value.trim();
+    const price = parseFloat(document.getElementById('f-price').value);
+    const cat   = document.getElementById('f-category').value.trim();
+    if (!name)          { showToast('⚠️ El nombre es requerido'); document.getElementById('f-name').focus(); return false; }
+    if (isNaN(price) || price < 0) { showToast('⚠️ El precio debe ser un número válido'); document.getElementById('f-price').focus(); return false; }
+    if (!cat)           { showToast('⚠️ La categoría es requerida'); document.getElementById('f-category').focus(); return false; }
+    return true;
+  }
+
+  function saveProduct() {
+    if (!validateForm()) return;
+    const list     = getProducts();
+    const editId   = document.getElementById('edit-id').value;
+    const name     = document.getElementById('f-name').value.trim();
+    const price    = parseFloat(document.getElementById('f-price').value);
+    const category = document.getElementById('f-category').value.trim();
+    const image    = document.getElementById('f-image').value.trim();
+    const desc     = document.getElementById('f-desc').value.trim();
+
+    if (editId) {
+      const idx = list.findIndex(p => p.id === Number(editId));
+      if (idx !== -1) {
+        list[idx] = { ...list[idx], name, price, category, image, description: desc };
+        saveProducts(list);
+        showToast('✅ Producto actualizado');
+      }
+    } else {
+      list.push({ id: nextId(list), name, price, category, image, description: desc });
+      saveProducts(list);
+      showToast('✅ Producto agregado');
+    }
+    clearForm();
+  }
+
+  // ─────────────────────────────────────────────
+  //  DELETE CONFIRM
+  // ─────────────────────────────────────────────
+  let pendingDeleteId = null;
+
+  function openConfirm(id) {
+    const product = getProducts().find(p => p.id === id);
+    pendingDeleteId = id;
+    document.getElementById('confirm-msg').textContent =
+      product ? `¿Eliminar "${product.name}"? Esta acción no se puede deshacer.` : 'Esta acción no se puede deshacer.';
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+  function closeConfirm() {
+    pendingDeleteId = null;
+    document.getElementById('confirm-overlay').classList.remove('open');
+  }
+  function confirmDelete() {
+    if (pendingDeleteId === null) return;
+    const list = getProducts().filter(p => p.id !== pendingDeleteId);
+    saveProducts(list);
+    // If editing this product, clear form
+    if (document.getElementById('edit-id').value === String(pendingDeleteId)) clearForm();
+    closeConfirm();
+    renderList();
+    showToast('🗑 Producto eliminado');
+  }
+
+  // ─────────────────────────────────────────────
+  //  EVENT LISTENERS
+  // ─────────────────────────────────────────────
+  document.getElementById('btn-save').addEventListener('click', saveProduct);
+  document.getElementById('btn-cancel').addEventListener('click', clearForm);
+  document.getElementById('confirm-yes').addEventListener('click', confirmDelete);
+  document.getElementById('confirm-no').addEventListener('click', closeConfirm);
+  document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+  });
+
+  document.getElementById('f-image').addEventListener('input', function() {
+    updateImagePreview(this.value.trim());
+  });
+
+  document.getElementById('products-list').addEventListener('click', function(e) {
+    const editBtn = e.target.closest('.icon-btn.edit');
+    if (editBtn) { loadForEdit(Number(editBtn.dataset.id)); return; }
+    const delBtn  = e.target.closest('.icon-btn.del');
+    if (delBtn)  { openConfirm(Number(delBtn.dataset.id)); return; }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeConfirm();
+  });
+
+  // ─────────────────────────────────────────────
+  //  INIT — load default products if storage empty
+  // ─────────────────────────────────────────────
+  function getDefaultProducts() {
+    return [
+      { id: 1, name: 'Mopa Industrial 120cm',   category: 'Mopas',   price: 85,  description: 'Mopa de microfibra para pisos industriales. Alta absorción.',                        image: '' },
+      { id: 2, name: 'Carro de Limpieza Pro',   category: 'Carros',  price: 320, description: 'Carro de limpieza con escurridor de doble cubo. Ruedas antideslizantes.',             image: '' },
+      { id: 3, name: 'Escoba de Goma',          category: 'Escobas', price: 45,  description: 'Escoba de goma con mango telescópico. Ideal para agua y residuos.',                  image: '' },
+      { id: 4, name: 'Trapeador Giratório 360°',category: 'Mopas',   price: 120, description: 'Trapeador con mecanismo giratorio y cubo escurridor automático.',                     image: '' },
+      { id: 5, name: 'Balde Escurridor 20L',    category: 'Baldes',  price: 95,  description: 'Balde con escurridor de pedal. Capacidad 20 litros.',                                image: '' },
+      { id: 6, name: 'Difusor de Aromas',       category: 'Aromas',  price: 210, description: 'Difusor automático para espacios grandes. Recarga cada 30 días.',                    image: '' }
+    ];
+  }
+
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    saveProducts(getDefaultProducts());
+  }
+
+  renderList();
+  updateStats();
+  updateCatSuggestions();
+  </script>
+
+</body>
+</html>

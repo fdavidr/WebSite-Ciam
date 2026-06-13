@@ -56,7 +56,17 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .header-right { display: flex; align-items: center; gap: .8rem; }
-
+    .btn-admin {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem .9rem;
+      font-family: 'Montserrat', sans-serif; font-size: .68rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+      background: transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .btn-admin:hover { color: var(--white); border-color: rgba(255,255,255,0.3); }
 
     /* ── CART BUTTON ── */
     .cart-btn {
@@ -414,48 +424,12 @@
     .btn-download svg { width:16px; height:16px; fill:currentColor; }
 
     /* ── RESPONSIVE ── */
-
-    /* Tablet (≤768px) */
-    @media (max-width: 768px) {
-      .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 1rem;
-      }
-      .search-bar { flex-direction: column; align-items: stretch; }
-      .cat-filter { width: 100%; }
-      .cart-drawer { width: 100vw; }
-      .modal { padding: 1.8rem 1.4rem 1.6rem; }
-    }
-
-    /* Móvil (≤500px) */
     @media (max-width: 500px) {
-      header { padding: .65rem .9rem; gap: .5rem; }
-      .header-logo span { font-size: 1.15rem; }
-      .cart-btn { padding: .45rem .85rem; font-size: .65rem; }
-
-      .search-bar { padding: .75rem .9rem .4rem; gap: .5rem; }
-      .search-input, .cat-filter { font-size: .82rem; padding: .5rem .8rem; }
-
-      main { padding: .8rem .9rem 3rem; }
-      .products-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
-      .product-body { padding: .7rem .75rem; gap: .3rem; }
-      .product-name { font-size: .78rem; }
-      .product-desc { font-size: .72rem; }
-      .product-price { font-size: .95rem; }
-      .btn-add { margin: 0 .75rem .75rem; padding: .55rem; font-size: .62rem; }
-
-      .footer-buttons { gap: .45rem; }
-      .f-btn { padding: .58rem .85rem; font-size: .6rem; }
-      .site-footer { padding: 1.5rem 1rem; }
-
-      .cart-total strong { font-size: 1rem; }
-      .btn-whatsapp { font-size: .7rem; padding: .75rem; }
-    }
-
-    /* Móvil muy pequeño (≤360px) */
-    @media (max-width: 360px) {
-      .products-grid { grid-template-columns: 1fr; }
-      .header-logo span { display: none; }
+      header { padding: .7rem 1rem; }
+      .search-bar { padding: .8rem 1rem .4rem; }
+      main { padding: 1rem 1rem 4rem; }
+      .footer-buttons { gap: .5rem; }
+      .f-btn { padding: .6rem 1rem; font-size: .62rem; }
     }
   </style>
 </head>
@@ -468,6 +442,10 @@
       <span>CIAM</span>
     </a>
     <div class="header-right">
+      <a href="admin.html" class="btn-admin" title="Panel de administración">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+        Admin
+      </a>
       <button class="cart-btn" id="cart-btn" aria-label="Ver carrito">
         <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2h2l.4 2M5 13h14l2-8H5.4M5 13L3.4 4H1M5 13l-1.4 6h15"/></svg>
         Carrito
