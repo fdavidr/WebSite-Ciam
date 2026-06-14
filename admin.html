@@ -303,15 +303,20 @@
               <input type="text" id="f-category" placeholder="Ej: Mopas, Carros, Escobas…" maxlength="40" list="cat-suggestions" />
               <datalist id="cat-suggestions"></datalist>
             </div>
-            <div class="field">
-              <label for="f-image">URL de imagen</label>
-              <input type="url" id="f-image" placeholder="https://…" />
-            </div>
           </div>
 
           <div class="field">
             <label for="f-desc">Descripción</label>
             <textarea id="f-desc" placeholder="Descripción breve del producto…" maxlength="300"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Imágenes del producto (URLs)</label>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
+              <input type="url" id="f-image1" placeholder="Imagen 1 (principal) — https://…" />
+              <input type="url" id="f-image2" placeholder="Imagen 2 (opcional) — https://…" />
+              <input type="url" id="f-image3" placeholder="Imagen 3 (opcional) — https://…" />
+            </div>
           </div>
 
           <div class="field">
