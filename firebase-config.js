@@ -23,10 +23,10 @@
 // ══════════════════════════════════════════════════════════════
 
 const FIREBASE_CONFIG = {
-  apiKey:            "TU_API_KEY",
-  authDomain:        "TU_PROJECT_ID.firebaseapp.com",
-  projectId:         "TU_PROJECT_ID",
-  storageBucket:     "TU_PROJECT_ID.appspot.com",
-  messagingSenderId: "TU_MESSAGING_SENDER_ID",
-  appId:             "TU_APP_ID"
+  apiKey:            "AIzaSyBZpOBBZq2VOTg4rQHNedK3UIHSHG3KaF4",
+  authDomain:        "ciam-siteweb.firebaseapp.com",
+  projectId:         "ciam-siteweb",
+  storageBucket:     "ciam-siteweb.firebasestorage.app",
+  messagingSenderId: "992483033692",
+  appId:             "1:992483033692:web:1c65fa44fa2dd4b7a75c99"
 };
