@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -604,32 +608,51 @@
 
   <script>
   // ─────────────────────────────────────────────
-  //  PRODUCTS DATA (managed via admin panel)
+  //  FIREBASE + PRODUCTS
   // ─────────────────────────────────────────────
-  const STORAGE_KEY = 'ciam_products';
-  const CART_KEY    = 'ciam_cart';
-  const WA_NUMBER   = '59176924727';
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const _db          = firebase.firestore();
+  const PRODUCTS_COL = _db.collection('products');
 
-  function getProducts() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : getDefaultProducts();
-    } catch(e) { return getDefaultProducts(); }
-  }
+  const CART_KEY  = 'ciam_cart';
+  const WA_NUMBER = '59176924727';
+
+  let _products = [];
+  function getProducts() { return _products; }
 
   function getDefaultProducts() {
     return [
-      { id: 1, name: 'Mopa Industrial 120cm', category: 'Mopas', price: 85, description: 'Mopa de microfibra para pisos industriales. Alta absorción.', image: '' },
-      { id: 2, name: 'Carro de Limpieza Pro', category: 'Carros', price: 320, description: 'Carro de limpieza con escurridor de doble cubo. Ruedas antideslizantes.', image: '' },
-      { id: 3, name: 'Escoba de Goma', category: 'Escobas', price: 45, description: 'Escoba de goma con mango telescópico. Ideal para agua y residuos.', image: '' },
-      { id: 4, name: 'Trapeador Giratório 360°', category: 'Mopas', price: 120, description: 'Trapeador con mecanismo giratorio y cubo escurridor automático.', image: '' },
-      { id: 5, name: 'Balde Escurridor 20L', category: 'Baldes', price: 95, description: 'Balde con escurridor de pedal. Capacidad 20 litros.', image: '' },
-      { id: 6, name: 'Difusor de Aromas Industrial', category: 'Aromas', price: 210, description: 'Difusor automático para espacios grandes. Recarga cada 30 días.', image: '' }
+      { id: 1, name: 'Mopa Industrial 120cm', category: 'Mopas', price: 85, description: 'Mopa de microfibra para pisos industriales. Alta absorción.', images: ['','',''] },
+      { id: 2, name: 'Carro de Limpieza Pro', category: 'Carros', price: 320, description: 'Carro de limpieza con escurridor de doble cubo. Ruedas antideslizantes.', images: ['','',''] },
+      { id: 3, name: 'Escoba de Goma', category: 'Escobas', price: 45, description: 'Escoba de goma con mango telescópico. Ideal para agua y residuos.', images: ['','',''] },
+      { id: 4, name: 'Trapeador Giratório 360°', category: 'Mopas', price: 120, description: 'Trapeador con mecanismo giratorio y cubo escurridor automático.', images: ['','',''] },
+      { id: 5, name: 'Balde Escurridor 20L', category: 'Baldes', price: 95, description: 'Balde con escurridor de pedal. Capacidad 20 litros.', images: ['','',''] },
+      { id: 6, name: 'Difusor de Aromas Industrial', category: 'Aromas', price: 210, description: 'Difusor automático para espacios grandes. Recarga cada 30 días.', images: ['','',''] }
     ];
   }
 
-  function saveProducts(products) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  async function loadProducts() {
+    try {
+      const snap = await PRODUCTS_COL.orderBy('_order').get();
+      if (snap.empty) {
+        _products = getDefaultProducts();
+        await saveProducts(_products);
+      } else {
+        _products = snap.docs.map(d => { const p = d.data(); delete p._order; return p; });
+      }
+    } catch(e) {
+      console.error('Firestore error:', e);
+      _products = getDefaultProducts();
+    }
+  }
+
+  async function saveProducts(list) {
+    _products = list;
+    const batch = _db.batch();
+    const existing = await PRODUCTS_COL.get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    list.forEach((p, i) => batch.set(PRODUCTS_COL.doc(String(p.id)), { ...p, _order: i }));
+    await batch.commit();
   }
 
   // ─────────────────────────────────────────────
@@ -853,18 +876,14 @@
   // ─────────────────────────────────────────────
   //  INIT
   // ─────────────────────────────────────────────
-  // Load defaults into localStorage if not present
-  if (!localStorage.getItem(STORAGE_KEY)) {
-    saveProducts(getDefaultProducts());
-  }
-
-  buildCategoryFilter();
-  filterAndRender();
   updateCartUI();
+  loadProducts().then(() => { buildCategoryFilter(); filterAndRender(); });
 
-  // Re-render when storage changes (from admin panel in another tab)
-  window.addEventListener('storage', e => {
-    if (e.key === STORAGE_KEY) { buildCategoryFilter(); filterAndRender(); }
+  // Escuchar cambios en Firestore en tiempo real
+  PRODUCTS_COL.orderBy('_order').onSnapshot(snap => {
+    if (snap.empty) return;
+    _products = snap.docs.map(d => { const p = d.data(); delete p._order; return p; });
+    buildCategoryFilter(); filterAndRender();
   });
 
   // ─────────────────────────────────────────────

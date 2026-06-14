@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -510,22 +514,17 @@
   </div>
 
   <script>
-  const STORAGE_KEY = 'ciam_products';
-  const CART_KEY    = 'ciam_cart';
-  const WA_NUMBER   = '59176924727';
+  // ── Firebase init ──────────────────────────────────────────
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const _db          = firebase.firestore();
+  const PRODUCTS_COL = _db.collection('products');
 
-  function getProducts() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        return JSON.parse(raw).map(p => {
-          if (!p.images) { p.images = [p.image||'','','']; delete p.image; }
-          return p;
-        });
-      }
-      return getDefaultProducts();
-    } catch(e) { return getDefaultProducts(); }
-  }
+  const CART_KEY  = 'ciam_cart';
+  const WA_NUMBER = '59176924727';
+
+  // Caché local de productos (se llena al iniciar)
+  let _products = [];
+  function getProducts() { return _products; }
 
   function getDefaultProducts() {
     return [
@@ -538,7 +537,31 @@
     ];
   }
 
-  function saveProducts(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+  // Carga productos desde Firestore (o semilla defaults si está vacío)
+  async function loadProducts() {
+    try {
+      const snap = await PRODUCTS_COL.orderBy('_order').get();
+      if (snap.empty) {
+        _products = getDefaultProducts();
+        await saveProducts(_products);
+      } else {
+        _products = snap.docs.map(d => { const p = d.data(); delete p._order; return p; });
+      }
+    } catch(e) {
+      console.error('Firestore error:', e);
+      _products = getDefaultProducts();
+    }
+  }
+
+  // Escribe la lista completa en Firestore (batch)
+  async function saveProducts(list) {
+    _products = list;
+    const batch = _db.batch();
+    const existing = await PRODUCTS_COL.get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    list.forEach((p, i) => batch.set(PRODUCTS_COL.doc(String(p.id)), { ...p, _order: i }));
+    await batch.commit();
+  }
   function getCart()       { try { return JSON.parse(localStorage.getItem(CART_KEY)||'[]'); } catch(e){ return []; } }
   function saveCart(c)     { localStorage.setItem(CART_KEY, JSON.stringify(c)); }
 
@@ -708,9 +731,15 @@
   document.getElementById('modal-close-cat').addEventListener('click',()=>closeModal('modal-catalogo'));
   document.getElementById('modal-catalogo').addEventListener('click',function(e){if(e.target===this)closeModal('modal-catalogo');});
 
-  if (!localStorage.getItem(STORAGE_KEY)) saveProducts(getDefaultProducts());
-  buildCategoryFilter(); filterAndRender(); updateCartUI();
-  window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY){buildCategoryFilter();filterAndRender();}});
+  updateCartUI();
+  loadProducts().then(() => { buildCategoryFilter(); filterAndRender(); });
+
+  // Escuchar cambios en Firestore en tiempo real (sync entre pestañas/dispositivos)
+  PRODUCTS_COL.orderBy('_order').onSnapshot(snap => {
+    if (snap.empty) return;
+    _products = snap.docs.map(d => { const p = d.data(); delete p._order; return p; });
+    buildCategoryFilter(); filterAndRender();
+  });
   </script>
 </body>
 </html>

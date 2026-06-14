@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -356,16 +360,42 @@
   <div id="toast"></div>
 
   <script>
-  const STORAGE_KEY = 'ciam_products';
+  // ─────────────────────────────────────────────
+  //  FIREBASE INIT
+  // ─────────────────────────────────────────────
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const _db          = firebase.firestore();
+  const PRODUCTS_COL = _db.collection('products');
 
   // ─────────────────────────────────────────────
   //  HELPERS
   // ─────────────────────────────────────────────
-  function getProducts() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch(e) { return []; }
+  let _products = [];
+  function getProducts() { return _products; }
+
+  async function loadProducts() {
+    try {
+      const snap = await PRODUCTS_COL.orderBy('_order').get();
+      if (snap.empty) {
+        _products = getDefaultProducts();
+        await saveProducts(_products);
+      } else {
+        _products = snap.docs.map(d => { const p = d.data(); delete p._order; return p; });
+      }
+    } catch(e) {
+      console.error('Firestore error:', e);
+      _products = getDefaultProducts();
+    }
   }
-  function saveProducts(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+
+  async function saveProducts(list) {
+    _products = list;
+    const batch = _db.batch();
+    const existing = await PRODUCTS_COL.get();
+    existing.docs.forEach(d => batch.delete(d.ref));
+    list.forEach((p, i) => batch.set(PRODUCTS_COL.doc(String(p.id)), { ...p, _order: i }));
+    await batch.commit();
+  }
 
   function nextId(list) {
     return list.length === 0 ? 1 : Math.max(...list.map(p => p.id)) + 1;
@@ -513,7 +543,7 @@
     return true;
   }
 
-  function saveProduct() {
+  async function saveProduct() {
     if (!validateForm()) return;
     const list     = getProducts();
     const editId   = document.getElementById('edit-id').value;
@@ -531,12 +561,12 @@
       const idx = list.findIndex(p => p.id === Number(editId));
       if (idx !== -1) {
         list[idx] = { ...list[idx], name, price, category, images, description: desc };
-        saveProducts(list);
+        await saveProducts(list);
         showToast('✅ Producto actualizado');
       }
     } else {
       list.push({ id: nextId(list), name, price, category, images, description: desc });
-      saveProducts(list);
+      await saveProducts(list);
       showToast('✅ Producto agregado');
     }
     clearForm();
@@ -558,11 +588,10 @@
     pendingDeleteId = null;
     document.getElementById('confirm-overlay').classList.remove('open');
   }
-  function confirmDelete() {
+  async function confirmDelete() {
     if (pendingDeleteId === null) return;
     const list = getProducts().filter(p => p.id !== pendingDeleteId);
-    saveProducts(list);
-    // If editing this product, clear form
+    await saveProducts(list);
     if (document.getElementById('edit-id').value === String(pendingDeleteId)) clearForm();
     closeConfirm();
     renderList();
@@ -608,14 +637,10 @@
       { id:4, name:'Trapeador Giratório 360°', category:'Mopas',   price:120, description:'Trapeador con mecanismo giratorio y cubo escurridor automático.',          images:['','',''] },
       { id:5, name:'Balde Escurridor 20L',     category:'Baldes',  price:95,  description:'Balde con escurridor de pedal. Capacidad 20 litros.',                     images:['','',''] },
       { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
-
-  if (!localStorage.getItem(STORAGE_KEY)) {
-    saveProducts(getDefaultProducts());
+    ];
   }
 
-  renderList();
-  updateStats();
-  updateCatSuggestions();
+  loadProducts().then(() => { renderList(); updateStats(); updateCatSuggestions(); });
   </script>
 
 </body>
