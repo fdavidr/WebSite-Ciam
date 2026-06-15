@@ -249,16 +249,16 @@
     /* ── AUTH OVERLAY ── */
     #auth-overlay {
       position: fixed; inset: 0; z-index: 9999;
-      background: rgba(26,0,48,0.97);
+      background: linear-gradient(160deg, #1a0030 0%, #3c0170 60%, #1a0030 100%);
       display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(12px);
     }
     .auth-box {
-      background: rgba(151,38,251,0.10);
+      background: rgba(151,38,251,0.12);
       border: 1px solid rgba(255,255,255,0.13);
       border-radius: 20px; padding: 2.5rem 2rem;
-      width: 100%; max-width: 380px;
+      width: 100%; max-width: 400px;
       text-align: center;
+      box-shadow: 0 8px 40px rgba(151,38,251,0.25);
     }
     .auth-logo { font-family: 'Montserrat',sans-serif; font-weight:900; font-size:1.5rem;
       letter-spacing:.1em; margin-bottom:1.5rem;
@@ -271,10 +271,11 @@
     .auth-field { text-align:left; margin-bottom:.8rem; }
     .auth-field label { display:block; font-size:.72rem; color:var(--muted); margin-bottom:.3rem;
       font-family:'Montserrat',sans-serif; letter-spacing:.05em; }
-    .auth-field input { width:100%; padding:.7rem .9rem; border-radius:9px;
+    .auth-field input { width:100%; padding:.7rem .9rem; border-radius:10px;
       background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
-      color:var(--white); font-size:.88rem; outline:none; transition:border-color .2s; }
-    .auth-field input:focus { border-color:var(--accent); }
+      color:var(--white); font-size:.88rem; outline:none; transition:border-color .2s;
+      font-family:'Open Sans',sans-serif; }
+    .auth-field input:focus { border-color:var(--accent); box-shadow: 0 0 0 2px rgba(151,38,251,.2); }
     .btn-auth { width:100%; padding:.75rem; margin-top:.5rem;
       font-family:'Montserrat',sans-serif; font-size:.78rem; font-weight:700;
       letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
