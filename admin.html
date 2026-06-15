@@ -499,7 +499,7 @@
     const email    = document.getElementById('l-email').value.trim();
     const password = document.getElementById('l-password').value;
     const errEl    = document.getElementById('auth-error-login');
-    errEl.textContent = '';
+    errEl.style.color = ''; errEl.textContent = '';
     if (!email || !password) { errEl.textContent = 'Ingresa correo y contraseña.'; return; }
     const btn = document.getElementById('btn-login');
     btn.disabled = true; btn.textContent = 'Ingresando…';
@@ -514,14 +514,21 @@
   document.getElementById('btn-goto-login').addEventListener('click', () => showLoginForm(''));
 
   document.getElementById('btn-forgot').addEventListener('click', async () => {
-    if (!email) { document.getElementById('auth-error-login').textContent = 'Ingresa tu correo primero.'; return; }
+    const email  = document.getElementById('l-email').value.trim();
+    const errEl  = document.getElementById('auth-error-login');
+    const btn    = document.getElementById('btn-forgot');
+    errEl.style.color = '';
+    if (!email) { errEl.textContent = 'Ingresa tu correo primero.'; return; }
+    btn.disabled = true; btn.textContent = 'Enviando…';
     try {
       await _auth.sendPasswordResetEmail(email);
-      document.getElementById('auth-error-login').style.color = '#4ade80';
-      document.getElementById('auth-error-login').textContent = 'Correo de recuperación enviado. Revisa tu bandeja.';
+      errEl.style.color = '#16a34a';
+      errEl.textContent = '✓ Correo de recuperación enviado. Revisa tu bandeja de entrada.';
     } catch(e) {
-      document.getElementById('auth-error-login').style.color = '#f87171';
-      document.getElementById('auth-error-login').textContent = authErrorMsg(e.code);
+      errEl.style.color = '';
+      errEl.textContent = authErrorMsg(e.code);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Olvidé mi contraseña';
     }
   });
 
