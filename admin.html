@@ -333,6 +333,8 @@
       </div>
       <button class="btn-auth" id="btn-register">Crear cuenta</button>
       <p class="auth-error" id="auth-error-reg"></p>
+      <hr class="auth-divider" />
+      <button class="btn-text-auth" id="btn-goto-login">¿Ya tienes cuenta? Iniciar sesión</button>
     </div>
 
     <!-- LOGIN (cuenta ya creada) -->
@@ -514,19 +516,26 @@
       if (snap.exists && snap.data().created) {
         // Account exists → show login form
         const username = snap.data().username || '';
-        document.getElementById('auth-login').style.display = 'block';
-        document.getElementById('auth-register').style.display = 'none';
-        if (username) document.getElementById('login-username-hint').textContent = `Hola, ${username}`;
+        showLoginForm(username);
       } else {
         // No account yet → show register form
-        document.getElementById('auth-register').style.display = 'block';
-        document.getElementById('auth-login').style.display = 'none';
+        showRegisterForm();
       }
     } catch(e) {
-      // If can't read Firestore, default to login
-      document.getElementById('auth-login').style.display = 'block';
-      document.getElementById('auth-register').style.display = 'none';
+      // Can't read Firestore (reglas aún no actualizadas) → mostrar registro
+      showRegisterForm();
     }
+  }
+
+  function showLoginForm(username) {
+    document.getElementById('auth-login').style.display = 'block';
+    document.getElementById('auth-register').style.display = 'none';
+    if (username) document.getElementById('login-username-hint').textContent = `Hola, ${username}`;
+  }
+
+  function showRegisterForm() {
+    document.getElementById('auth-register').style.display = 'block';
+    document.getElementById('auth-login').style.display = 'none';
   }
 
   document.getElementById('btn-register').addEventListener('click', async () => {
@@ -566,8 +575,9 @@
     }
   });
 
+  document.getElementById('btn-goto-login').addEventListener('click', () => showLoginForm(''));
+
   document.getElementById('btn-forgot').addEventListener('click', async () => {
-    const email = document.getElementById('l-email').value.trim();
     if (!email) { document.getElementById('auth-error-login').textContent = 'Ingresa tu correo primero.'; return; }
     try {
       await _auth.sendPasswordResetEmail(email);
