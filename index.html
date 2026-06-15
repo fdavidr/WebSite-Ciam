@@ -733,6 +733,23 @@
 
   updateCartUI();
   loadProducts().then(() => { buildCategoryFilter(); filterAndRender(); });
+  loadPdfs();
+
+  async function loadPdfs() {
+    try {
+      const snap = await _db.collection('config').doc('pdfs').get();
+      if (!snap.exists) return;
+      const { catalogo, ofertas } = snap.data();
+      if (catalogo) {
+        document.querySelector('#modal-catalogo iframe').src = catalogo;
+        document.querySelector('#modal-catalogo .btn-download').href = catalogo;
+      }
+      if (ofertas) {
+        const ofEl = document.querySelector('a.f-btn-of');
+        if (ofEl) ofEl.href = ofertas;
+      }
+    } catch(e) { console.warn('PDFs no cargados desde Firestore:', e); }
+  }
 
   // Escuchar cambios en Firestore en tiempo real (sync entre pestañas/dispositivos)
   PRODUCTS_COL.orderBy('_order').onSnapshot(snap => {

@@ -1,25 +1,27 @@
 // ══════════════════════════════════════════════════════════════
 //  CONFIGURACIÓN DE FIREBASE PARA CIAM
-//  1. Ve a https://console.firebase.google.com/
-//  2. Crea un proyecto (o abre uno existente)
-//  3. En "Descripción general del proyecto" → haz clic en el ícono </> (Web)
-//  4. Registra la app y copia los valores de firebaseConfig aquí abajo
-//  5. En el menú lateral → Build → Firestore Database → Crear base de datos
-//     (elige modo "Producción" y la región más cercana, ej: us-east1)
-//  6. En Firestore → Reglas, pega estas reglas y publica:
+// ══════════════════════════════════════════════════════════════
 //
-//     rules_version = '2';
-//     service cloud.firestore {
-//       match /databases/{database}/documents {
-//         match /products/{doc} {
-//           allow read: if true;
-//           allow write: if true;
-//         }
-//       }
-//     }
+//  REGLAS DE FIRESTORE (Firestore → Reglas → Publicar):
 //
-//  NOTA: Las reglas de arriba permiten escritura pública (OK para comenzar).
-//        Más adelante puedes agregar autenticación al panel admin.
+//  rules_version = '2';
+//  service cloud.firestore {
+//    match /databases/{database}/documents {
+//      // Productos: lectura pública, escritura solo autenticado
+//      match /products/{doc} {
+//        allow read: if true;
+//        allow write: if request.auth != null;
+//      }
+//      // Config (PDFs, admin): lectura pública, escritura solo autenticado
+//      match /config/{doc} {
+//        allow read: if true;
+//        allow write: if request.auth != null;
+//      }
+//    }
+//  }
+//
+//  NOTA: Activa también "Email/Contraseña" en Firebase Console:
+//        Authentication → Sign-in method → Email/contraseña → Habilitar
 // ══════════════════════════════════════════════════════════════
 
 const FIREBASE_CONFIG = {

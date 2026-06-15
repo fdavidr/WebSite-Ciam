@@ -10,6 +10,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
 
   <style>
@@ -244,9 +245,114 @@
 
     /* EMPTY */
     .no-products { text-align: center; padding: 2rem; color: var(--muted); font-size: .85rem; }
+
+    /* ── AUTH OVERLAY ── */
+    #auth-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10,0,25,0.97);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .auth-box {
+      background: rgba(151,38,251,0.08);
+      border: 1px solid rgba(151,38,251,0.35);
+      border-radius: 20px; padding: 2.5rem 2rem;
+      width: 100%; max-width: 380px;
+      text-align: center;
+    }
+    .auth-logo { font-family: 'Montserrat',sans-serif; font-weight:900; font-size:1.5rem;
+      letter-spacing:.1em; margin-bottom:1.5rem;
+      background: linear-gradient(135deg,#fff 30%,#e879f9 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .auth-subtitle { font-size:.8rem; color:var(--muted); margin-bottom:1.5rem; }
+    .auth-box h2 { font-family:'Montserrat',sans-serif; font-size:1rem; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; margin-bottom:.3rem; }
+    .auth-field { text-align:left; margin-bottom:.8rem; }
+    .auth-field label { display:block; font-size:.72rem; color:var(--muted); margin-bottom:.3rem;
+      font-family:'Montserrat',sans-serif; letter-spacing:.05em; }
+    .auth-field input { width:100%; padding:.7rem .9rem; border-radius:9px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
+      color:var(--white); font-size:.88rem; outline:none; transition:border-color .2s; }
+    .auth-field input:focus { border-color:var(--accent); }
+    .btn-auth { width:100%; padding:.75rem; margin-top:.5rem;
+      font-family:'Montserrat',sans-serif; font-size:.78rem; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
+      background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff;
+      border:none; border-radius:10px; transition:opacity .2s; }
+    .btn-auth:hover { opacity:.88; }
+    .btn-auth:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-text-auth { background:none; border:none; color:var(--accent2);
+      font-size:.78rem; cursor:pointer; margin-top:.6rem; text-decoration:underline; }
+    .auth-error { color:#f87171; font-size:.78rem; margin-top:.7rem; min-height:1rem; }
+    .auth-divider { border:none; border-top:1px solid rgba(255,255,255,.08); margin:1.2rem 0; }
+
+    /* ── PDF SECTION ── */
+    .pdf-row { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
+    .pdf-row label { font-size:.72rem; color:var(--muted);
+      font-family:'Montserrat',sans-serif; letter-spacing:.05em; }
+    .pdf-input-row { display:flex; gap:.5rem; }
+    .pdf-input-row input { flex:1; padding:.55rem .8rem; border-radius:8px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+      color:var(--white); font-size:.82rem; outline:none; }
+    .pdf-input-row input:focus { border-color:var(--accent); }
+    .btn-pdf { padding:.55rem 1rem;
+      font-family:'Montserrat',sans-serif; font-size:.68rem; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+      background:linear-gradient(135deg,rgba(151,38,251,.35),rgba(232,121,249,.15));
+      border:1px solid rgba(151,38,251,.5); color:var(--white);
+      border-radius:8px; white-space:nowrap; transition:opacity .2s; }
+    .btn-pdf:hover { opacity:.85; }
+    .pdf-current { font-size:.72rem; color:var(--muted); }
+    .pdf-current a { color:var(--accent2); text-decoration:none; }
+    .pdf-current a:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
+
+<!-- ── AUTH OVERLAY ── -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">CIAM</div>
+
+    <!-- REGISTRO (primera vez) -->
+    <div id="auth-register">
+      <h2>Crear cuenta Admin</h2>
+      <p class="auth-subtitle">Solo se puede crear una cuenta de administrador.</p>
+      <div class="auth-field">
+        <label>Usuario</label>
+        <input type="text" id="r-username" placeholder="Nombre de usuario" maxlength="30" autocomplete="username" />
+      </div>
+      <div class="auth-field">
+        <label>Correo (para recuperación de contraseña)</label>
+        <input type="email" id="r-email" placeholder="correo@ejemplo.com" autocomplete="email" />
+      </div>
+      <div class="auth-field">
+        <label>Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="r-password" placeholder="••••••" minlength="6" autocomplete="new-password" />
+      </div>
+      <button class="btn-auth" id="btn-register">Crear cuenta</button>
+      <p class="auth-error" id="auth-error-reg"></p>
+    </div>
+
+    <!-- LOGIN (cuenta ya creada) -->
+    <div id="auth-login" style="display:none">
+      <h2>Bienvenido</h2>
+      <p class="auth-subtitle" id="login-username-hint"></p>
+      <div class="auth-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="l-email" placeholder="correo@ejemplo.com" autocomplete="email" />
+      </div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="l-password" placeholder="••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-auth" id="btn-login">Iniciar sesión</button>
+      <button class="btn-text-auth" id="btn-forgot">Olvidé mi contraseña</button>
+      <p class="auth-error" id="auth-error-login"></p>
+    </div>
+  </div>
+</div>
 
   <!-- ── HEADER ── -->
   <header>
@@ -261,8 +367,7 @@
       <a href="index.html" class="btn-link primary">
         🛍 Ver Tienda
       </a>
-      <a href="index.html" class="btn-link">← Inicio</a>
-    </div>
+      <a href="index.html" class="btn-link">← Inicio</a>      <button id="btn-logout" class="btn-link" style="cursor:pointer;display:none">Cerrar sesión</button>    </div>
   </header>
 
   <!-- ── MAIN LAYOUT ── -->
@@ -336,14 +441,39 @@
       </div>
     </div>
 
-    <!-- ── RIGHT: PRODUCTS LIST ── -->
-    <div class="panel">
-      <div class="panel-title">
-        📦 Productos <span id="product-count-label">0 productos</span>
+    <!-- ── RIGHT: PRODUCTS LIST + PDFS ── -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">
+          📦 Productos <span id="product-count-label">0 productos</span>
+        </div>
+
+        <div class="products-list" id="products-list">
+          <div class="no-products">Cargando productos…</div>
+        </div>
       </div>
 
-      <div class="products-list" id="products-list">
-        <div class="no-products">Cargando productos…</div>
+      <!-- ── PDF MANAGEMENT ── -->
+      <div class="panel" style="margin-top:1.5rem">
+        <div class="panel-title">📄 Documentos PDF</div>
+
+        <div class="pdf-row">
+          <label>Catálogo PDF</label>
+          <div class="pdf-input-row">
+            <input type="url" id="pdf-catalogo-url" placeholder="https://… (URL del PDF)" />
+            <button class="btn-pdf" id="btn-save-catalogo">Actualizar</button>
+          </div>
+          <div class="pdf-current">Actual: <a id="pdf-catalogo-link" href="#" target="_blank" rel="noopener">Ver PDF</a></div>
+        </div>
+
+        <div class="pdf-row">
+          <label>Ofertas PDF</label>
+          <div class="pdf-input-row">
+            <input type="url" id="pdf-ofertas-url" placeholder="https://… (URL del PDF)" />
+            <button class="btn-pdf" id="btn-save-ofertas">Actualizar</button>
+          </div>
+          <div class="pdf-current">Actual: <a id="pdf-ofertas-link" href="#" target="_blank" rel="noopener">Ver PDF</a></div>
+        </div>
       </div>
     </div>
 
@@ -370,7 +500,161 @@
   // ─────────────────────────────────────────────
   firebase.initializeApp(FIREBASE_CONFIG);
   const _db          = firebase.firestore();
+  const _auth        = firebase.auth();
   const PRODUCTS_COL = _db.collection('products');
+  const CONFIG_DOC   = _db.collection('config').doc('admin');
+  const PDFS_DOC     = _db.collection('config').doc('pdfs');
+
+  // ─────────────────────────────────────────────
+  //  AUTH LOGIC
+  // ─────────────────────────────────────────────
+  async function initAuth() {
+    try {
+      const snap = await CONFIG_DOC.get();
+      if (snap.exists && snap.data().created) {
+        // Account exists → show login form
+        const username = snap.data().username || '';
+        document.getElementById('auth-login').style.display = 'block';
+        document.getElementById('auth-register').style.display = 'none';
+        if (username) document.getElementById('login-username-hint').textContent = `Hola, ${username}`;
+      } else {
+        // No account yet → show register form
+        document.getElementById('auth-register').style.display = 'block';
+        document.getElementById('auth-login').style.display = 'none';
+      }
+    } catch(e) {
+      // If can't read Firestore, default to login
+      document.getElementById('auth-login').style.display = 'block';
+      document.getElementById('auth-register').style.display = 'none';
+    }
+  }
+
+  document.getElementById('btn-register').addEventListener('click', async () => {
+    const username = document.getElementById('r-username').value.trim();
+    const email    = document.getElementById('r-email').value.trim();
+    const password = document.getElementById('r-password').value;
+    const errEl    = document.getElementById('auth-error-reg');
+    errEl.textContent = '';
+    if (!username) { errEl.textContent = 'El usuario es requerido.'; return; }
+    if (!email)    { errEl.textContent = 'El correo es requerido.'; return; }
+    if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+    const btn = document.getElementById('btn-register');
+    btn.disabled = true; btn.textContent = 'Creando cuenta…';
+    try {
+      await _auth.createUserWithEmailAndPassword(email, password);
+      await CONFIG_DOC.set({ created: true, username });
+      errEl.textContent = '';
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Crear cuenta';
+      errEl.textContent = authErrorMsg(e.code);
+    }
+  });
+
+  document.getElementById('btn-login').addEventListener('click', async () => {
+    const email    = document.getElementById('l-email').value.trim();
+    const password = document.getElementById('l-password').value;
+    const errEl    = document.getElementById('auth-error-login');
+    errEl.textContent = '';
+    if (!email || !password) { errEl.textContent = 'Ingresa correo y contraseña.'; return; }
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = 'Ingresando…';
+    try {
+      await _auth.signInWithEmailAndPassword(email, password);
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Iniciar sesión';
+      errEl.textContent = authErrorMsg(e.code);
+    }
+  });
+
+  document.getElementById('btn-forgot').addEventListener('click', async () => {
+    const email = document.getElementById('l-email').value.trim();
+    if (!email) { document.getElementById('auth-error-login').textContent = 'Ingresa tu correo primero.'; return; }
+    try {
+      await _auth.sendPasswordResetEmail(email);
+      document.getElementById('auth-error-login').style.color = '#4ade80';
+      document.getElementById('auth-error-login').textContent = 'Correo de recuperación enviado. Revisa tu bandeja.';
+    } catch(e) {
+      document.getElementById('auth-error-login').style.color = '#f87171';
+      document.getElementById('auth-error-login').textContent = authErrorMsg(e.code);
+    }
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', () => _auth.signOut());
+
+  // Enter key para login
+  ['l-email','l-password'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-login').click(); });
+  });
+
+  function authErrorMsg(code) {
+    const msgs = {
+      'auth/email-already-in-use': 'Este correo ya tiene una cuenta.',
+      'auth/invalid-email':        'Correo inválido.',
+      'auth/weak-password':        'Contraseña muy débil (mínimo 6 caracteres).',
+      'auth/user-not-found':       'No existe una cuenta con ese correo.',
+      'auth/wrong-password':       'Contraseña incorrecta.',
+      'auth/invalid-credential':   'Correo o contraseña incorrectos.',
+      'auth/too-many-requests':    'Demasiados intentos. Espera unos minutos.',
+      'auth/user-disabled':        'Cuenta deshabilitada.',
+      'auth/network-request-failed': 'Sin conexión a internet.'
+    };
+    return msgs[code] || `Error: ${code}`;
+  }
+
+  _auth.onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('btn-logout').style.display = 'inline-flex';
+      loadProducts().then(() => { renderList(); updateStats(); updateCatSuggestions(); });
+      loadPdfs();
+    } else {
+      document.getElementById('auth-overlay').style.display = 'flex';
+      document.getElementById('btn-logout').style.display = 'none';
+      document.getElementById('btn-login').disabled = false;
+      document.getElementById('btn-login').textContent = 'Iniciar sesión';
+      initAuth();
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  //  PDF MANAGEMENT
+  // ─────────────────────────────────────────────
+  async function loadPdfs() {
+    try {
+      const snap = await PDFS_DOC.get();
+      const data = snap.exists ? snap.data() : {};
+      const catalogoUrl = data.catalogo || '';
+      const ofertasUrl  = data.ofertas  || '';
+      document.getElementById('pdf-catalogo-url').value = catalogoUrl;
+      document.getElementById('pdf-ofertas-url').value  = ofertasUrl;
+      updatePdfLink('pdf-catalogo-link', catalogoUrl);
+      updatePdfLink('pdf-ofertas-link', ofertasUrl);
+    } catch(e) { console.error('Error cargando PDFs:', e); }
+  }
+
+  function updatePdfLink(linkId, url) {
+    const el = document.getElementById(linkId);
+    if (url) { el.href = url; el.style.opacity = '1'; }
+    else     { el.href = '#'; el.style.opacity = '.4'; }
+  }
+
+  document.getElementById('btn-save-catalogo').addEventListener('click', async () => {
+    const url = document.getElementById('pdf-catalogo-url').value.trim();
+    try {
+      await PDFS_DOC.set({ catalogo: url }, { merge: true });
+      updatePdfLink('pdf-catalogo-link', url);
+      showToast('✅ Catálogo PDF actualizado');
+    } catch(e) { showToast('❌ Error al guardar'); }
+  });
+
+  document.getElementById('btn-save-ofertas').addEventListener('click', async () => {
+    const url = document.getElementById('pdf-ofertas-url').value.trim();
+    try {
+      await PDFS_DOC.set({ ofertas: url }, { merge: true });
+      updatePdfLink('pdf-ofertas-link', url);
+      showToast('✅ Ofertas PDF actualizado');
+    } catch(e) { showToast('❌ Error al guardar'); }
+  });
 
   // ─────────────────────────────────────────────
   //  HELPERS
@@ -644,8 +928,7 @@
       { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
     ];
   }
-
-  loadProducts().then(() => { renderList(); updateStats(); updateCatSuggestions(); });
+  // Init handled by onAuthStateChanged above
   </script>
 
 </body>
