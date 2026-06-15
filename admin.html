@@ -17,19 +17,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f001f;
-      --panel: rgba(255,255,255,0.04);
-      --border: rgba(255,255,255,0.10);
+      --bg: #1a0030;
+      --panel: rgba(151,38,251,0.10);
+      --border: rgba(255,255,255,0.13);
       --accent: #9726fb;
       --accent2: #e879f9;
       --green: #25d366;
-      --white: #f0f0f0;
-      --muted: #999;
+      --white: #f5f5f5;
+      --muted: #aaa;
       --danger: #f87171;
     }
 
     body {
-      background: linear-gradient(160deg, #0f001f 0%, #2a0055 60%, #0f001f 100%);
+      background: linear-gradient(160deg, #1a0030 0%, #3c0170 60%, #1a0030 100%);
       min-height: 100vh;
       font-family: 'Open Sans', sans-serif;
       color: var(--white);
@@ -38,7 +38,7 @@
     /* ── HEADER ── */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(15,0,31,0.97);
+      background: rgba(26,0,48,0.97);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: .8rem 1.5rem;
@@ -119,7 +119,7 @@
     }
     input:focus, textarea:focus, select:focus { border-color: var(--accent); }
     textarea { resize: vertical; min-height: 70px; }
-    select option { background: #1a003a; }
+    select option { background: #2a0050; }
 
     .img-preview {
       width: 100%; border-radius: 10px; overflow: hidden;
@@ -219,7 +219,7 @@
     }
     .confirm-overlay.open { display: flex; }
     .confirm-box {
-      background: #1a003a; border: 1px solid rgba(248,113,113,.35);
+      background: #2a0050; border: 1px solid rgba(248,113,113,.35);
       border-radius: 14px; padding: 1.8rem 2rem;
       text-align: center; max-width: 320px; width: 90%;
     }
@@ -249,13 +249,13 @@
     /* ── AUTH OVERLAY ── */
     #auth-overlay {
       position: fixed; inset: 0; z-index: 9999;
-      background: rgba(10,0,25,0.97);
+      background: rgba(26,0,48,0.97);
       display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(12px);
     }
     .auth-box {
-      background: rgba(151,38,251,0.08);
-      border: 1px solid rgba(151,38,251,0.35);
+      background: rgba(151,38,251,0.10);
+      border: 1px solid rgba(255,255,255,0.13);
       border-radius: 20px; padding: 2.5rem 2rem;
       width: 100%; max-width: 380px;
       text-align: center;
