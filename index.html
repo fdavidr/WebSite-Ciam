@@ -543,7 +543,6 @@
       const snap = await PRODUCTS_COL.orderBy('_order').get();
       if (snap.empty) {
         _products = getDefaultProducts();
-        await saveProducts(_products);
       } else {
         _products = snap.docs.map(d => { const p = d.data(); delete p._order; return p; });
       }
@@ -558,7 +557,10 @@
     _products = list;
     const batch = _db.batch();
     const existing = await PRODUCTS_COL.get();
-    existing.docs.forEach(d => batch.delete(d.ref));
+    const nextIds = new Set(list.map(p => String(p.id)));
+    existing.docs.forEach(d => {
+      if (!nextIds.has(d.id)) batch.delete(d.ref);
+    });
     list.forEach((p, i) => batch.set(PRODUCTS_COL.doc(String(p.id)), { ...p, _order: i }));
     await batch.commit();
   }
