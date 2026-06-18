@@ -252,7 +252,7 @@
     <div class="auth-logo">CIAM</div>
 
     <!-- REGISTRO (primera vez) -->
-    <div id="auth-register">
+    <div id="auth-register" style="display:none">
       <h2>Crear cuenta Admin</h2>
       <p class="auth-subtitle">Solo se puede crear una cuenta de administrador.</p>
       <div class="auth-field">
@@ -274,7 +274,7 @@
     </div>
 
     <!-- LOGIN (cuenta ya creada) -->
-    <div id="auth-login" style="display:none">
+    <div id="auth-login">
       <h2>Bienvenido</h2>
       <p class="auth-subtitle" id="login-username-hint"></p>
       <div class="auth-field">
@@ -287,6 +287,8 @@
       </div>
       <button class="btn-auth" id="btn-login">Iniciar sesión</button>
       <button class="btn-text-auth" id="btn-forgot">Olvidé mi contraseña</button>
+      <button class="btn-text-auth" id="btn-goto-register">Crear cuenta</button>
+      <p class="auth-subtitle" id="auth-create-note" style="margin-top:.4rem; font-size:.72rem;"></p>
       <p class="auth-error" id="auth-error-login"></p>
     </div>
   </div>
@@ -345,6 +347,10 @@
               <label for="f-category">Categoría *</label>
               <input type="text" id="f-category" placeholder="Ej: Mopas, Carros, Escobas…" maxlength="40" list="cat-suggestions" />
               <datalist id="cat-suggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="f-discount">Descuento (%)</label>
+              <input type="number" id="f-discount" placeholder="0" min="0" max="95" step="1" />
             </div>
           </div>
 
@@ -442,6 +448,7 @@
   const PRODUCTS_COL = _db.collection('products');
   const CONFIG_DOC   = _db.collection('config').doc('admin');
   const PDFS_DOC     = _db.collection('config').doc('pdfs');
+  let _adminAccountCreated = false;
 
   // ─────────────────────────────────────────────
   //  AUTH LOGIC
@@ -450,23 +457,34 @@
     try {
       const snap = await CONFIG_DOC.get();
       if (snap.exists && snap.data().created) {
-        // Account exists → show login form
+        _adminAccountCreated = true;
         const username = snap.data().username || '';
-        showLoginForm(username);
+        showLoginForm(username, 'Ya existe una cuenta creada. No se permiten más registros.');
       } else {
-        // No account yet → show register form
-        showRegisterForm();
+        _adminAccountCreated = false;
+        showLoginForm('', 'No hay cuenta creada todavía. Puedes crear una desde el enlace de abajo.');
       }
     } catch(e) {
-      // Can't read Firestore (reglas aún no actualizadas) → mostrar registro
-      showRegisterForm();
+      _adminAccountCreated = true;
+      showLoginForm('', 'No se puede verificar el estado de registro ahora.');
     }
   }
 
-  function showLoginForm(username) {
+  function updateCreateAccountUI(message) {
+    const noteEl = document.getElementById('auth-create-note');
+    const createBtn = document.getElementById('btn-goto-register');
+    noteEl.textContent = message || '';
+    createBtn.disabled = _adminAccountCreated;
+    createBtn.style.opacity = _adminAccountCreated ? '.55' : '1';
+    createBtn.style.cursor = _adminAccountCreated ? 'not-allowed' : 'pointer';
+  }
+
+  function showLoginForm(username, message) {
     document.getElementById('auth-login').style.display = 'block';
     document.getElementById('auth-register').style.display = 'none';
     if (username) document.getElementById('login-username-hint').textContent = `Hola, ${username}`;
+    else document.getElementById('login-username-hint').textContent = '';
+    updateCreateAccountUI(message);
   }
 
   function showRegisterForm() {
@@ -480,18 +498,34 @@
     const password = document.getElementById('r-password').value;
     const errEl    = document.getElementById('auth-error-reg');
     errEl.textContent = '';
+    if (_adminAccountCreated) {
+      errEl.textContent = 'Ya existe una cuenta creada. No se permiten más registros.';
+      showLoginForm('', 'Ya existe una cuenta creada. No se permiten más registros.');
+      return;
+    }
     if (!username) { errEl.textContent = 'El usuario es requerido.'; return; }
     if (!email)    { errEl.textContent = 'El correo es requerido.'; return; }
     if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
     const btn = document.getElementById('btn-register');
     btn.disabled = true; btn.textContent = 'Creando cuenta…';
     try {
+      const existsSnap = await CONFIG_DOC.get();
+      if (existsSnap.exists && existsSnap.data().created) {
+        _adminAccountCreated = true;
+        showLoginForm('', 'Ya existe una cuenta creada. No se permiten más registros.');
+        errEl.textContent = 'Ya existe una cuenta creada. No se pueden registrar más cuentas.';
+        return;
+      }
       await _auth.createUserWithEmailAndPassword(email, password);
       await CONFIG_DOC.set({ created: true, username });
+      _adminAccountCreated = true;
       errEl.textContent = '';
     } catch(e) {
       btn.disabled = false; btn.textContent = 'Crear cuenta';
       errEl.textContent = authErrorMsg(e.code);
+      return;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Crear cuenta';
     }
   });
 
@@ -512,6 +546,16 @@
   });
 
   document.getElementById('btn-goto-login').addEventListener('click', () => showLoginForm(''));
+
+  document.getElementById('btn-goto-register').addEventListener('click', () => {
+    const errEl = document.getElementById('auth-error-login');
+    if (_adminAccountCreated) {
+      errEl.textContent = 'Ya existe una cuenta creada. No se pueden registrar más cuentas.';
+      return;
+    }
+    errEl.textContent = '';
+    showRegisterForm();
+  });
 
   document.getElementById('btn-forgot').addEventListener('click', async () => {
     const email  = document.getElementById('l-email').value.trim();
@@ -658,6 +702,30 @@
     return list.length === 0 ? 1 : Math.max(...list.map(p => p.id)) + 1;
   }
 
+  function getDiscountValue(product) {
+    const raw = Number(product && product.discount);
+    if (!Number.isFinite(raw)) return 0;
+    return Math.min(95, Math.max(0, raw));
+  }
+
+  function getFinalPrice(product) {
+    const base = Number(product && product.price) || 0;
+    const discount = getDiscountValue(product);
+    return base * (1 - discount / 100);
+  }
+
+  function sortDiscountFirst(list) {
+    return list
+      .map((p, i) => ({ p, i }))
+      .sort((a, b) => {
+        const ad = getDiscountValue(a.p) > 0 ? 1 : 0;
+        const bd = getDiscountValue(b.p) > 0 ? 1 : 0;
+        if (ad !== bd) return bd - ad;
+        return a.i - b.i;
+      })
+      .map(x => x.p);
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g,'&amp;')
@@ -681,7 +749,7 @@
   function updateStats() {
     const list = getProducts();
     const cats = new Set(list.map(p => p.category)).size;
-    const avg  = list.length ? (list.reduce((s,p) => s + p.price, 0) / list.length).toFixed(0) : 0;
+    const avg  = list.length ? (list.reduce((s,p) => s + getFinalPrice(p), 0) / list.length).toFixed(0) : 0;
     document.getElementById('stat-total').textContent  = list.length;
     document.getElementById('stat-cats').textContent   = cats;
     document.getElementById('stat-avgprice').textContent = `Bs ${avg}`;
@@ -704,6 +772,7 @@
 
   function renderList() {
     const list = getProducts();
+    const sortedList = sortDiscountFirst(list);
     const container = document.getElementById('products-list');
     const label = document.getElementById('product-count-label');
     label.textContent = `${list.length} producto${list.length !== 1 ? 's' : ''}`;
@@ -715,10 +784,15 @@
 
     const editingId = document.getElementById('edit-id').value ? Number(document.getElementById('edit-id').value) : null;
 
-    container.innerHTML = list.map(p => {
+    container.innerHTML = sortedList.map(p => {
       const emoji = EMOJIS[p.category] || '📦';
       const isEditing = p.id === editingId;
       const img0 = (p.images && p.images[0]) || p.image || '';
+      const discount = getDiscountValue(p);
+      const finalPrice = getFinalPrice(p);
+      const priceHtml = discount > 0
+        ? `<div class="row-price"><span style="text-decoration:line-through;opacity:.6;font-size:.72rem;display:block;">Bs ${Number(p.price).toFixed(2)}</span>Bs ${finalPrice.toFixed(2)} <span style="font-size:.66rem;color:var(--accent2);">-${discount}%</span></div>`
+        : `<div class="row-price">Bs ${Number(p.price).toFixed(2)}</div>`;
       return `
         <div class="product-row ${isEditing ? 'editing' : ''}" data-id="${p.id}">
           <div class="row-img">
@@ -728,7 +802,7 @@
             <div class="row-name">${escapeHtml(p.name)}</div>
             <div class="row-meta">${escapeHtml(p.category)}</div>
           </div>
-          <div class="row-price">Bs ${Number(p.price).toFixed(2)}</div>
+          ${priceHtml}
           <div class="row-actions">
             <button class="icon-btn edit" data-id="${p.id}" title="Editar">✏️</button>
             <button class="icon-btn del"  data-id="${p.id}" title="Eliminar">🗑</button>
@@ -748,6 +822,7 @@
     document.getElementById('edit-id').value = '';
     document.getElementById('f-name').value  = '';
     document.getElementById('f-price').value = '';
+    document.getElementById('f-discount').value = '0';
     document.getElementById('f-category').value = '';
     document.getElementById('f-image1').value = '';
     document.getElementById('f-image2').value = '';
@@ -767,6 +842,7 @@
     document.getElementById('edit-id').value     = product.id;
     document.getElementById('f-name').value      = product.name;
     document.getElementById('f-price').value     = product.price;
+    document.getElementById('f-discount').value  = getDiscountValue(product);
     document.getElementById('f-category').value  = product.category;
     document.getElementById('f-image1').value    = imgs[0] || '';
     document.getElementById('f-image2').value    = imgs[1] || '';
@@ -793,9 +869,11 @@
   function validateForm() {
     const name  = document.getElementById('f-name').value.trim();
     const price = parseFloat(document.getElementById('f-price').value);
+    const discount = Number(document.getElementById('f-discount').value || 0);
     const cat   = document.getElementById('f-category').value.trim();
     if (!name)          { showToast('⚠️ El nombre es requerido'); document.getElementById('f-name').focus(); return false; }
     if (isNaN(price) || price < 0) { showToast('⚠️ El precio debe ser un número válido'); document.getElementById('f-price').focus(); return false; }
+    if (!Number.isFinite(discount) || discount < 0 || discount > 95) { showToast('⚠️ El descuento debe estar entre 0 y 95'); document.getElementById('f-discount').focus(); return false; }
     if (!cat)           { showToast('⚠️ La categoría es requerida'); document.getElementById('f-category').focus(); return false; }
     return true;
   }
@@ -806,6 +884,7 @@
     const editId   = document.getElementById('edit-id').value;
     const name     = document.getElementById('f-name').value.trim();
     const price    = parseFloat(document.getElementById('f-price').value);
+    const discount = Number(document.getElementById('f-discount').value || 0);
     const category = document.getElementById('f-category').value.trim();
     const images   = [
       document.getElementById('f-image1').value.trim(),
@@ -817,12 +896,12 @@
     if (editId) {
       const idx = list.findIndex(p => p.id === Number(editId));
       if (idx !== -1) {
-        list[idx] = { ...list[idx], name, price, category, images, description: desc };
+        list[idx] = { ...list[idx], name, price, discount: Math.min(95, Math.max(0, discount)), category, images, description: desc };
         await saveProducts(list);
         showToast('✅ Producto actualizado');
       }
     } else {
-      list.push({ id: nextId(list), name, price, category, images, description: desc });
+      list.push({ id: nextId(list), name, price, discount: Math.min(95, Math.max(0, discount)), category, images, description: desc });
       await saveProducts(list);
       showToast('✅ Producto agregado');
     }
@@ -888,12 +967,12 @@
   // ─────────────────────────────────────────────
   function getDefaultProducts() {
     return [
-      { id:1, name:'Mopa Industrial 120cm',    category:'Mopas',   price:85,  description:'Mopa de microfibra para pisos industriales. Alta absorción.',            images:['','',''] },
-      { id:2, name:'Carro de Limpieza Pro',    category:'Carros',  price:320, description:'Carro con escurridor de doble cubo. Ruedas antideslizantes.',             images:['','',''] },
-      { id:3, name:'Escoba de Goma',           category:'Escobas', price:45,  description:'Escoba de goma con mango telescópico. Ideal para agua y residuos.',       images:['','',''] },
-      { id:4, name:'Trapeador Giratório 360°', category:'Mopas',   price:120, description:'Trapeador con mecanismo giratorio y cubo escurridor automático.',          images:['','',''] },
-      { id:5, name:'Balde Escurridor 20L',     category:'Baldes',  price:95,  description:'Balde con escurridor de pedal. Capacidad 20 litros.',                     images:['','',''] },
-      { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
+      { id:1, name:'Mopa Industrial 120cm',    category:'Mopas',   price:85,  discount:0, description:'Mopa de microfibra para pisos industriales. Alta absorción.',            images:['','',''] },
+      { id:2, name:'Carro de Limpieza Pro',    category:'Carros',  price:320, discount:0, description:'Carro con escurridor de doble cubo. Ruedas antideslizantes.',             images:['','',''] },
+      { id:3, name:'Escoba de Goma',           category:'Escobas', price:45,  discount:0, description:'Escoba de goma con mango telescópico. Ideal para agua y residuos.',       images:['','',''] },
+      { id:4, name:'Trapeador Giratório 360°', category:'Mopas',   price:120, discount:0, description:'Trapeador con mecanismo giratorio y cubo escurridor automático.',          images:['','',''] },
+      { id:5, name:'Balde Escurridor 20L',     category:'Baldes',  price:95,  discount:0, description:'Balde con escurridor de pedal. Capacidad 20 litros.',                     images:['','',''] },
+      { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, discount:0, description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
     ];
   }
   // Init handled by onAuthStateChanged above
