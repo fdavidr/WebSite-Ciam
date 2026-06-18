@@ -554,7 +554,7 @@
     return msgs[code] || `Error: ${code}`;
   }
 
-  _auth.onAuthStateChanged(user => {
+  function handleAuthState(user) {
     if (user) {
       document.getElementById('auth-overlay').style.display = 'none';
       document.getElementById('btn-logout').style.display = 'inline-flex';
@@ -567,6 +567,19 @@
       document.getElementById('btn-login').textContent = 'Iniciar sesión';
       initAuth();
     }
+  }
+
+  async function enforceLoginEveryVisit() {
+    try {
+      await _auth.setPersistence(firebase.auth.Auth.Persistence.NONE);
+      await _auth.signOut();
+    } catch (e) {
+      console.warn('No se pudo forzar sesión por visita:', e);
+    }
+  }
+
+  enforceLoginEveryVisit().finally(() => {
+    _auth.onAuthStateChanged(handleAuthState);
   });
 
   // ─────────────────────────────────────────────
