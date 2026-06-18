@@ -67,7 +67,7 @@
     .btn-link.primary:hover { background: var(--accent); color: #fff; box-shadow: 0 0 16px var(--shadow); }
 
     /* ── LAYOUT ── */
-    .layout { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; padding: 1.5rem; }
+    .layout { display: grid; grid-template-columns: 1fr; gap: 1.5rem; padding: 1.5rem; }
     @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
     @media (max-width: 600px) { .layout { padding: 1rem; gap: 1rem; } }
 
@@ -131,6 +131,24 @@
       width: 100%;
     }
     .quick-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .btn-new-product {
+      width: 100%;
+      padding: .85rem 1rem;
+      margin-bottom: .8rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 11px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      cursor: pointer;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+    }
+    .btn-new-product:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 4px 16px var(--shadow); }
+    #product-form-panel { display: none; }
     .product-row {
       display: flex; align-items: center; gap: .8rem; background: var(--surface);
       border: 1.5px solid var(--card-border); border-radius: 12px; padding: .7rem .9rem;
@@ -202,67 +220,6 @@
     }
     .btn-cancel:hover { color: var(--accent); border-color: var(--accent); }
     .no-products { text-align: center; padding: 2rem; color: var(--muted); font-size: .85rem; }
-
-    /* ── INVENTORY ── */
-    .inventory-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .5rem;
-      margin-bottom: .8rem;
-    }
-    .inv-chip {
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: var(--surface);
-      padding: .45rem .55rem;
-      text-align: center;
-    }
-    .inv-chip strong { display: block; font-family: 'Montserrat', sans-serif; color: var(--accent); font-size: .86rem; }
-    .inv-chip span { font-size: .62rem; color: var(--muted); letter-spacing: .07em; text-transform: uppercase; }
-    .inventory-list {
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-      max-height: 340px;
-      overflow-y: auto;
-      padding-right: .2rem;
-    }
-    .inventory-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: .6rem;
-      align-items: center;
-      border: 1.5px solid var(--card-border);
-      border-radius: 10px;
-      padding: .55rem .65rem;
-      background: var(--surface);
-    }
-    .inventory-name { font-size: .78rem; font-weight: 700; color: var(--text); }
-    .inventory-meta { font-size: .68rem; color: var(--muted); margin-top: .1rem; }
-    .inventory-controls { display: flex; align-items: center; gap: .35rem; }
-    .inv-btn {
-      width: 26px;
-      height: 26px;
-      border-radius: 7px;
-      border: 1.5px solid var(--border);
-      background: var(--accent-mid);
-      color: var(--text-mid);
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .inv-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .inv-input {
-      width: 70px;
-      padding: .35rem .45rem;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: .78rem;
-      text-align: center;
-      background: var(--surface);
-      color: var(--text);
-    }
-    .inv-low .inventory-name,
-    .inv-low .inventory-meta { color: #b91c1c; }
 
     /* ── AUTH OVERLAY ── */
     #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; }
@@ -385,16 +342,27 @@
   <!-- ── MAIN LAYOUT ── -->
   <div class="layout">
 
-    <!-- ── LEFT: FORM ── -->
     <div>
-      <!-- Stats -->
+      <div class="panel">
+        <div class="panel-title">
+          📦 Productos <span id="product-count-label">0 productos</span>
+        </div>
+
+        <button class="btn-new-product" id="btn-new-product">+ Nuevo Producto</button>
+        <input class="quick-search" id="admin-quick-search" type="search" placeholder="Buscar para editar rápido: nombre, categoría o ID…" />
+
+        <div class="products-list" id="products-list">
+          <div class="no-products">Cargando productos…</div>
+        </div>
+      </div>
+
+      <div id="product-form-panel" style="margin-top:1.5rem;">
       <div class="stats-bar" id="stats-bar">
         <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Productos</div></div>
         <div class="stat-card"><div class="stat-num" id="stat-cats">0</div><div class="stat-lbl">Categorías</div></div>
         <div class="stat-card"><div class="stat-num" id="stat-avgprice">0</div><div class="stat-lbl">Precio Prom.</div></div>
       </div>
 
-      <!-- Add/Edit form -->
       <div class="panel">
         <div class="panel-title">
           <span id="form-mode-label">➕ Agregar Producto</span>
@@ -423,13 +391,6 @@
             <div class="field">
               <label for="f-discount">Descuento (%)</label>
               <input type="number" id="f-discount" placeholder="0" min="0" max="95" step="1" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="field">
-              <label for="f-stock">Inventario (stock)</label>
-              <input type="number" id="f-stock" placeholder="0" min="0" step="1" />
             </div>
           </div>
 
@@ -462,35 +423,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- ── RIGHT: PRODUCTS LIST + PDFS ── -->
-    <div>
-      <div class="panel">
-        <div class="panel-title">
-          📦 Productos <span id="product-count-label">0 productos</span>
-        </div>
-
-        <input class="quick-search" id="admin-quick-search" type="search" placeholder="Buscar para editar rápido: nombre, categoría o ID…" />
-
-        <div class="products-list" id="products-list">
-          <div class="no-products">Cargando productos…</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:1.5rem">
-        <div class="panel-title">📊 Inventario <span id="inventory-count-label">0 items</span></div>
-
-        <div class="inventory-summary">
-          <div class="inv-chip"><strong id="inv-total">0</strong><span>Total</span></div>
-          <div class="inv-chip"><strong id="inv-positive">0</strong><span>Con stock</span></div>
-          <div class="inv-chip"><strong id="inv-low">0</strong><span>Stock bajo</span></div>
-        </div>
-
-        <input class="quick-search" id="inventory-search" type="search" placeholder="Buscar en inventario para ajustes masivos…" />
-        <div class="inventory-list" id="inventory-list">
-          <div class="no-products" style="padding:1rem">Cargando inventario…</div>
-        </div>
       </div>
 
       <!-- ── PDF MANAGEMENT ── -->
@@ -804,12 +736,6 @@
     return Math.min(95, Math.max(0, raw));
   }
 
-  function getStockValue(product) {
-    const raw = Number(product && product.stock);
-    if (!Number.isFinite(raw)) return 0;
-    return Math.max(0, Math.floor(raw));
-  }
-
   function getFinalPrice(product) {
     const base = Number(product && product.price) || 0;
     const discount = getDiscountValue(product);
@@ -885,7 +811,6 @@
 
     if (filtered.length === 0) {
       container.innerHTML = '<div class="no-products">No hay productos aún.<br>Agrega el primero desde el formulario.</div>';
-      renderInventory();
       return;
     }
 
@@ -907,7 +832,7 @@
           </div>
           <div class="row-info">
             <div class="row-name">${escapeHtml(p.name)}</div>
-            <div class="row-meta">${escapeHtml(p.category)} · Stock: ${getStockValue(p)}</div>
+            <div class="row-meta">${escapeHtml(p.category)}</div>
           </div>
           ${priceHtml}
           <div class="row-actions">
@@ -920,7 +845,6 @@
 
     updateStats();
     updateCatSuggestions();
-    renderInventory();
   }
 
   // ─────────────────────────────────────────────
@@ -931,7 +855,6 @@
     document.getElementById('f-name').value  = '';
     document.getElementById('f-price').value = '';
     document.getElementById('f-discount').value = '0';
-    document.getElementById('f-stock').value = '0';
     document.getElementById('f-category').value = '';
     document.getElementById('f-image1').value = '';
     document.getElementById('f-image2').value = '';
@@ -941,6 +864,7 @@
     document.getElementById('form-mode-label').textContent = '➕ Agregar Producto';
     document.getElementById('btn-save').textContent = 'Guardar Producto';
     document.getElementById('btn-cancel').style.display = 'none';
+    document.getElementById('product-form-panel').style.display = 'block';
     renderList();
   }
 
@@ -952,7 +876,6 @@
     document.getElementById('f-name').value      = product.name;
     document.getElementById('f-price').value     = product.price;
     document.getElementById('f-discount').value  = getDiscountValue(product);
-    document.getElementById('f-stock').value     = getStockValue(product);
     document.getElementById('f-category').value  = product.category;
     document.getElementById('f-image1').value    = imgs[0] || '';
     document.getElementById('f-image2').value    = imgs[1] || '';
@@ -961,6 +884,7 @@
     document.getElementById('form-mode-label').textContent = '✏️ Editar Producto';
     document.getElementById('btn-save').textContent = 'Actualizar Producto';
     document.getElementById('btn-cancel').style.display = 'inline-flex';
+    document.getElementById('product-form-panel').style.display = 'block';
     [1,2,3].forEach(n => updateImagePreview(imgs[n-1]||'', n));
     renderList();
     document.getElementById('f-name').focus();
@@ -980,12 +904,10 @@
     const name  = document.getElementById('f-name').value.trim();
     const price = parseFloat(document.getElementById('f-price').value);
     const discount = Number(document.getElementById('f-discount').value || 0);
-    const stock = Number(document.getElementById('f-stock').value || 0);
     const cat   = document.getElementById('f-category').value.trim();
     if (!name)          { showToast('⚠️ El nombre es requerido'); document.getElementById('f-name').focus(); return false; }
     if (isNaN(price) || price < 0) { showToast('⚠️ El precio debe ser un número válido'); document.getElementById('f-price').focus(); return false; }
     if (!Number.isFinite(discount) || discount < 0 || discount > 95) { showToast('⚠️ El descuento debe estar entre 0 y 95'); document.getElementById('f-discount').focus(); return false; }
-    if (!Number.isFinite(stock) || stock < 0) { showToast('⚠️ El inventario debe ser 0 o mayor'); document.getElementById('f-stock').focus(); return false; }
     if (!cat)           { showToast('⚠️ La categoría es requerida'); document.getElementById('f-category').focus(); return false; }
     return true;
   }
@@ -997,7 +919,6 @@
     const name     = document.getElementById('f-name').value.trim();
     const price    = parseFloat(document.getElementById('f-price').value);
     const discount = Number(document.getElementById('f-discount').value || 0);
-    const stock    = Math.max(0, Math.floor(Number(document.getElementById('f-stock').value || 0)));
     const category = document.getElementById('f-category').value.trim();
     const images   = [
       document.getElementById('f-image1').value.trim(),
@@ -1009,12 +930,12 @@
     if (editId) {
       const idx = list.findIndex(p => p.id === Number(editId));
       if (idx !== -1) {
-        list[idx] = { ...list[idx], name, price, discount: Math.min(95, Math.max(0, discount)), stock, category, images, description: desc };
+        list[idx] = { ...list[idx], name, price, discount: Math.min(95, Math.max(0, discount)), category, images, description: desc };
         await saveProducts(list);
         showToast('✅ Producto actualizado');
       }
     } else {
-      list.push({ id: nextId(list), name, price, discount: Math.min(95, Math.max(0, discount)), stock, category, images, description: desc });
+      list.push({ id: nextId(list), name, price, discount: Math.min(95, Math.max(0, discount)), category, images, description: desc });
       await saveProducts(list);
       showToast('✅ Producto agregado');
     }
@@ -1071,83 +992,15 @@
     if (delBtn)  { openConfirm(Number(delBtn.dataset.id)); return; }
   });
 
-  async function updateStockById(id, value, silent) {
-    const list = getProducts();
-    const idx = list.findIndex(p => p.id === id);
-    if (idx === -1) return;
-    const nextStock = Math.max(0, Math.floor(Number(value) || 0));
-    list[idx] = { ...list[idx], stock: nextStock };
-    await PRODUCTS_COL.doc(String(id)).set({ ...list[idx], _order: idx }, { merge: true });
-    _products = list;
-    renderList();
-    renderInventory();
-    if (!silent) showToast(`📦 Stock actualizado: ${list[idx].name} → ${nextStock}`);
-  }
-
-  function renderInventory() {
-    const list = getProducts();
-    const searchQ = document.getElementById('inventory-search').value.trim().toLowerCase();
-    const filtered = searchQ
-      ? list.filter(p => (`${p.id} ${p.name} ${p.category}`.toLowerCase().includes(searchQ)) )
-      : list;
-
-    const container = document.getElementById('inventory-list');
-    document.getElementById('inventory-count-label').textContent = `${filtered.length} items`;
-    document.getElementById('inv-total').textContent = list.length;
-    document.getElementById('inv-positive').textContent = list.filter(p => getStockValue(p) > 0).length;
-    document.getElementById('inv-low').textContent = list.filter(p => getStockValue(p) > 0 && getStockValue(p) <= 5).length;
-
-    if (filtered.length === 0) {
-      container.innerHTML = '<div class="no-products" style="padding:1rem">No hay coincidencias en inventario.</div>';
-      return;
-    }
-
-    container.innerHTML = sortDiscountFirst(filtered).map(p => {
-      const stock = getStockValue(p);
-      return `
-        <div class="inventory-row ${stock <= 5 ? 'inv-low' : ''}" data-id="${p.id}">
-          <div>
-            <div class="inventory-name">${escapeHtml(p.name)}</div>
-            <div class="inventory-meta">ID ${p.id} · ${escapeHtml(p.category)} · ${stock <= 5 ? 'Stock bajo' : 'Stock normal'}</div>
-          </div>
-          <div class="inventory-controls">
-            <button class="inv-btn" data-stock-delta="-10" title="Restar 10">-10</button>
-            <button class="inv-btn" data-stock-delta="-1" title="Restar 1">-</button>
-            <input class="inv-input" type="number" min="0" step="1" value="${stock}" data-stock-input="1" />
-            <button class="inv-btn" data-stock-delta="1" title="Sumar 1">+</button>
-            <button class="inv-btn" data-stock-delta="10" title="Sumar 10">+10</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  document.getElementById('inventory-list').addEventListener('click', async function(e) {
-    const btn = e.target.closest('[data-stock-delta]');
-    if (!btn) return;
-    const row = e.target.closest('.inventory-row');
-    if (!row) return;
-    const id = Number(row.dataset.id);
-    const input = row.querySelector('[data-stock-input]');
-    const current = Number(input.value || 0);
-    const delta = Number(btn.dataset.stockDelta || 0);
-    await updateStockById(id, current + delta, true);
-  });
-
-  document.getElementById('inventory-list').addEventListener('change', async function(e) {
-    const input = e.target.closest('[data-stock-input]');
-    if (!input) return;
-    const row = e.target.closest('.inventory-row');
-    if (!row) return;
-    await updateStockById(Number(row.dataset.id), Number(input.value || 0), true);
-  });
-
   document.getElementById('admin-quick-search').addEventListener('input', function() {
     renderList();
   });
 
-  document.getElementById('inventory-search').addEventListener('input', function() {
-    renderInventory();
+  document.getElementById('btn-new-product').addEventListener('click', function() {
+    clearForm();
+    document.getElementById('product-form-panel').style.display = 'block';
+    document.getElementById('f-name').focus();
+    window.scrollTo({ top: document.getElementById('product-form-panel').offsetTop - 20, behavior: 'smooth' });
   });
 
   document.addEventListener('keydown', e => {
@@ -1159,12 +1012,12 @@
   // ─────────────────────────────────────────────
   function getDefaultProducts() {
     return [
-      { id:1, name:'Mopa Industrial 120cm',    category:'Mopas',   price:85,  discount:0, stock:25, description:'Mopa de microfibra para pisos industriales. Alta absorción.',            images:['','',''] },
-      { id:2, name:'Carro de Limpieza Pro',    category:'Carros',  price:320, discount:0, stock:8,  description:'Carro con escurridor de doble cubo. Ruedas antideslizantes.',             images:['','',''] },
-      { id:3, name:'Escoba de Goma',           category:'Escobas', price:45,  discount:0, stock:40, description:'Escoba de goma con mango telescópico. Ideal para agua y residuos.',       images:['','',''] },
-      { id:4, name:'Trapeador Giratório 360°', category:'Mopas',   price:120, discount:0, stock:14, description:'Trapeador con mecanismo giratorio y cubo escurridor automático.',          images:['','',''] },
-      { id:5, name:'Balde Escurridor 20L',     category:'Baldes',  price:95,  discount:0, stock:19, description:'Balde con escurridor de pedal. Capacidad 20 litros.',                     images:['','',''] },
-      { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, discount:0, stock:6,  description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
+      { id:1, name:'Mopa Industrial 120cm',    category:'Mopas',   price:85,  discount:0, description:'Mopa de microfibra para pisos industriales. Alta absorción.',            images:['','',''] },
+      { id:2, name:'Carro de Limpieza Pro',    category:'Carros',  price:320, discount:0, description:'Carro con escurridor de doble cubo. Ruedas antideslizantes.',             images:['','',''] },
+      { id:3, name:'Escoba de Goma',           category:'Escobas', price:45,  discount:0, description:'Escoba de goma con mango telescópico. Ideal para agua y residuos.',       images:['','',''] },
+      { id:4, name:'Trapeador Giratório 360°', category:'Mopas',   price:120, discount:0, description:'Trapeador con mecanismo giratorio y cubo escurridor automático.',          images:['','',''] },
+      { id:5, name:'Balde Escurridor 20L',     category:'Baldes',  price:95,  discount:0, description:'Balde con escurridor de pedal. Capacidad 20 litros.',                     images:['','',''] },
+      { id:6, name:'Difusor de Aromas',        category:'Aromas',  price:210, discount:0, description:'Difusor automático para espacios grandes. Recarga cada 30 días.',         images:['','',''] }
     ];
   }
   // Init handled by onAuthStateChanged above
