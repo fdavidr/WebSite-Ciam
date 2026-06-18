@@ -372,6 +372,21 @@
     .btn-download:hover { opacity:.9; transform:translateY(-2px); }
     .btn-download svg { width:16px; height:16px; fill:currentColor; }
 
+    .product-detail-wrap { display: grid; gap: .9rem; }
+    .product-detail-visual { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .product-detail-meta { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+    .product-detail-name { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; color: var(--text); margin-top: .1rem; }
+    .product-detail-desc { color: var(--text-mid); line-height: 1.55; font-size: .88rem; }
+    .product-detail-price { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; color: var(--accent); font-weight: 700; display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
+    .product-detail-old { text-decoration: line-through; color: var(--muted); font-size: .82rem; }
+    .product-detail-stock { font-size: .75rem; color: var(--muted); }
+    .btn-detail-add {
+      width: 100%; padding: .72rem 1rem; border-radius: 10px; border: none;
+      font-family: 'Montserrat', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; cursor: pointer;
+    }
+    .btn-detail-add:hover { opacity: .92; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
@@ -519,6 +534,14 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-product-detail" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:620px;">
+      <button class="modal-close" id="modal-close-product">&times;</button>
+      <div class="product-detail-wrap" id="product-detail-content"></div>
+      <button class="btn-detail-add" id="btn-detail-add">Agregar al carrito</button>
+    </div>
+  </div>
+
   <script>
   // ── Firebase init ──────────────────────────────────────────
   firebase.initializeApp(FIREBASE_CONFIG);
@@ -527,6 +550,7 @@
 
   const CART_KEY  = 'ciam_cart';
   const WA_NUMBER = '59176924727';
+  let _activeDetailProductId = null;
 
   // Caché local de productos (se llena al iniciar)
   let _products = [];
@@ -643,6 +667,12 @@
     return base * (1 - discount / 100);
   }
 
+  function getStockValue(product) {
+    const raw = Number(product && product.stock);
+    if (!Number.isFinite(raw)) return 0;
+    return Math.max(0, Math.floor(raw));
+  }
+
   function sortDiscountFirst(list) {
     return list
       .map((p, i) => ({ p, i }))
@@ -695,6 +725,7 @@
         ? `<div class="product-price"><span class="product-price-old">Bs ${Number(p.price).toFixed(2)}</span>Bs ${finalPrice.toFixed(2)} <span>/ unidad</span><span class="product-discount-tag">-${discount}%</span></div>`
         : `<div class="product-price">Bs ${Number(p.price).toFixed(2)} <span>/ unidad</span></div>`;
       const card=document.createElement('div'); card.className='product-card';
+      card.dataset.id = String(p.id);
       card.innerHTML=`
         ${buildCarousel(p.images, p.name)}
         <div class="product-body">
@@ -709,6 +740,30 @@
       grid.appendChild(card);
     });
     grid.querySelectorAll('.carousel').forEach(c=>initCarousel(c));
+  }
+
+  function openProductDetail(productId) {
+    const product = getProducts().find(p => p.id === productId);
+    if (!product) return;
+    _activeDetailProductId = productId;
+    const discount = getDiscountValue(product);
+    const finalPrice = getEffectivePrice(product);
+    const priceLine = discount > 0
+      ? `<div class="product-detail-price"><span class="product-detail-old">Bs ${Number(product.price).toFixed(2)}</span>Bs ${finalPrice.toFixed(2)} <span>/ unidad</span><span class="product-discount-tag">-${discount}%</span></div>`
+      : `<div class="product-detail-price">Bs ${Number(product.price).toFixed(2)} <span>/ unidad</span></div>`;
+
+    document.getElementById('product-detail-content').innerHTML = `
+      <div class="product-detail-visual">${buildCarousel(product.images, product.name)}</div>
+      <div class="product-detail-meta">${esc(product.category)}</div>
+      <h3 class="product-detail-name">${esc(product.name)}</h3>
+      <p class="product-detail-desc">${esc(product.description || 'Sin descripción')}</p>
+      ${priceLine}
+      <p class="product-detail-stock">Inventario: ${getStockValue(product)} unidades</p>
+    `;
+
+    const carousel = document.querySelector('#product-detail-content .carousel');
+    if (carousel) initCarousel(carousel);
+    openModal('modal-product-detail');
   }
 
   function buildCategoryFilter() {
@@ -755,13 +810,22 @@
   document.getElementById('search-input').addEventListener('input', filterAndRender);
   document.getElementById('cat-filter').addEventListener('change', filterAndRender);
   document.getElementById('products-grid').addEventListener('click', function(e){
-    const b=e.target.closest('.btn-add'); if(b) addToCart(Number(b.dataset.id));
+    const b=e.target.closest('.btn-add');
+    if (b) { addToCart(Number(b.dataset.id)); return; }
+    const card = e.target.closest('.product-card');
+    if (card && card.dataset.id) openProductDetail(Number(card.dataset.id));
   });
   document.getElementById('cart-items').addEventListener('click', function(e){
     const r=e.target.closest('.cart-item-remove'); if(r){removeFromCart(Number(r.dataset.id));return;}
     const q=e.target.closest('.qty-btn'); if(q) changeQty(Number(q.dataset.id),Number(q.dataset.delta));
   });
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCart();closeModal('modal-sucursales');closeModal('modal-catalogo');}});
+  document.getElementById('btn-detail-add').addEventListener('click', function() {
+    if (_activeDetailProductId !== null) addToCart(_activeDetailProductId);
+  });
+  document.getElementById('modal-close-product').addEventListener('click', () => closeModal('modal-product-detail'));
+  document.getElementById('modal-product-detail').addEventListener('click', function(e) { if (e.target === this) closeModal('modal-product-detail'); });
+
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCart();closeModal('modal-sucursales');closeModal('modal-catalogo');closeModal('modal-product-detail');}});
 
   document.getElementById('footer-btn-sucursales').addEventListener('click',()=>openModal('modal-sucursales'));
   document.getElementById('modal-close-suc').addEventListener('click',()=>closeModal('modal-sucursales'));

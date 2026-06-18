@@ -434,6 +434,28 @@
     .btn-download:hover { opacity:.9; transform:translateY(-2px); }
     .btn-download svg { width:16px; height:16px; fill:currentColor; }
 
+    .product-detail-wrap { display: grid; gap: .85rem; }
+    .product-detail-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+    .product-detail-gallery img,
+    .product-detail-main {
+      width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05); object-fit: cover;
+    }
+    .product-detail-main { aspect-ratio: 16/10; }
+    .product-detail-gallery img { aspect-ratio: 1/1; }
+    .product-detail-meta { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); font-weight: 700; }
+    .product-detail-name { font-family: 'Montserrat', sans-serif; font-size: 1.08rem; color: #fff; }
+    .product-detail-desc { color: rgba(255,255,255,.82); line-height: 1.55; font-size: .88rem; }
+    .product-detail-price { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 700; display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
+    .product-detail-old { text-decoration: line-through; color: rgba(255,255,255,.6); font-size: .82rem; }
+    .product-detail-stock { font-size: .75rem; color: rgba(255,255,255,.65); }
+    .btn-detail-add {
+      width: 100%; padding: .72rem 1rem; border-radius: 10px; border: none;
+      font-family: 'Montserrat', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      background: linear-gradient(135deg, #7c3aed, #e879f9); color: #fff; cursor: pointer;
+    }
+    .btn-detail-add:hover { opacity: .92; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 500px) {
       header { padding: .7rem 1rem; }
@@ -613,6 +635,14 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-product-detail" role="dialog" aria-modal="true" aria-label="Detalle de producto">
+    <div class="modal" style="max-width:640px;">
+      <button class="modal-close" id="modal-close-product" aria-label="Cerrar">&times;</button>
+      <div class="product-detail-wrap" id="product-detail-content"></div>
+      <button class="btn-detail-add" id="btn-detail-add">Agregar al carrito</button>
+    </div>
+  </div>
+
   <script>
   // ─────────────────────────────────────────────
   //  FIREBASE + PRODUCTS
@@ -623,6 +653,7 @@
 
   const CART_KEY  = 'ciam_cart';
   const WA_NUMBER = '59176924727';
+  let _activeDetailProductId = null;
 
   let _products = [];
   function getProducts() { return _products; }
@@ -774,6 +805,12 @@
     return base * (1 - discount / 100);
   }
 
+  function getStockValue(product) {
+    const raw = Number(product && product.stock);
+    if (!Number.isFinite(raw)) return 0;
+    return Math.max(0, Math.floor(raw));
+  }
+
   function sortDiscountFirst(list) {
     return list
       .map((p, i) => ({ p, i }))
@@ -802,6 +839,7 @@
     list.forEach(p => {
       const card = document.createElement('div');
       card.className = 'product-card';
+      card.dataset.id = String(p.id);
       const emoji = EMOJIS[p.category] || '📦';
       const img0 = (p.images && p.images[0]) || p.image || '';
       const discount = getDiscountValue(p);
@@ -829,6 +867,36 @@
       `;
       grid.appendChild(card);
     });
+  }
+
+  function openProductDetail(productId) {
+    const product = getProducts().find(p => p.id === productId);
+    if (!product) return;
+    _activeDetailProductId = productId;
+    const images = (product.images || []).filter(Boolean);
+    const img0 = images[0] || product.image || '';
+    const thumbs = images.slice(1, 4).map(url => `<img src="${escapeHtml(url)}" alt="${escapeHtml(product.name)}" loading="lazy" />`).join('');
+    const discount = getDiscountValue(product);
+    const finalPrice = getEffectivePrice(product);
+    const priceLine = discount > 0
+      ? `<div class="product-detail-price"><span class="product-detail-old">Bs ${Number(product.price).toFixed(2)}</span>Bs ${finalPrice.toFixed(2)} <span>/ unidad</span><span class="product-discount-tag">-${discount}%</span></div>`
+      : `<div class="product-detail-price">Bs ${Number(product.price).toFixed(2)} <span>/ unidad</span></div>`;
+
+    document.getElementById('product-detail-content').innerHTML = `
+      ${img0 ? `<img class="product-detail-main" src="${escapeHtml(img0)}" alt="${escapeHtml(product.name)}" loading="lazy" />` : `<div class="product-detail-main" style="display:flex;align-items:center;justify-content:center;font-size:2rem;">📦</div>`}
+      ${thumbs ? `<div class="product-detail-gallery">${thumbs}</div>` : ''}
+      <div class="product-detail-meta">${escapeHtml(product.category)}</div>
+      <h3 class="product-detail-name">${escapeHtml(product.name)}</h3>
+      <p class="product-detail-desc">${escapeHtml(product.description || 'Sin descripción')}</p>
+      ${priceLine}
+      <p class="product-detail-stock">Inventario: ${getStockValue(product)} unidades</p>
+    `;
+
+    document.getElementById('modal-product-detail').classList.add('open');
+  }
+
+  function closeProductDetail() {
+    document.getElementById('modal-product-detail').classList.remove('open');
   }
 
   function buildCategoryFilter() {
@@ -903,7 +971,15 @@
   document.getElementById('products-grid').addEventListener('click', function(e) {
     const addBtn = e.target.closest('.btn-add');
     if (addBtn) { addToCart(Number(addBtn.dataset.id)); return; }
+    const card = e.target.closest('.product-card');
+    if (card && card.dataset.id) openProductDetail(Number(card.dataset.id));
   });
+
+  document.getElementById('btn-detail-add').addEventListener('click', function() {
+    if (_activeDetailProductId !== null) addToCart(_activeDetailProductId);
+  });
+  document.getElementById('modal-close-product').addEventListener('click', closeProductDetail);
+  document.getElementById('modal-product-detail').addEventListener('click', function(e) { if (e.target === this) closeProductDetail(); });
 
   document.getElementById('cart-items').addEventListener('click', function(e) {
     const removeBtn = e.target.closest('.cart-item-remove');
@@ -912,7 +988,7 @@
     if (qtyBtn) { changeQty(Number(qtyBtn.dataset.id), Number(qtyBtn.dataset.delta)); return; }
   });
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCart(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeProductDetail(); } });
 
   // ─────────────────────────────────────────────
   //  INIT
@@ -965,6 +1041,7 @@
       if (e.key === 'Escape') {
         closeModal('modal-sucursales');
         closeModal('modal-catalogo');
+        closeProductDetail();
       }
     });
   })();
