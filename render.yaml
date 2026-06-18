@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: website-ciam
+    env: static
+    staticPublishPath: .
+    headers:
+      - path: "/*.html"
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
