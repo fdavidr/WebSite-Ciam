@@ -195,7 +195,50 @@
       transition: opacity .2s, transform .2s, box-shadow .2s;
     }
     .btn-new-product:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 4px 16px var(--shadow); }
-    #product-form-panel { display: none; }
+    .form-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 350;
+      background: rgba(30,16,48,.35);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .form-modal-overlay.open { display: flex; }
+    .form-modal {
+      width: min(980px, 100%);
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 16px 48px var(--shadow);
+      position: relative;
+    }
+    .form-modal .panel { margin-bottom: 0; }
+    .form-modal-close {
+      position: sticky;
+      top: 0;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+      z-index: 2;
+    }
+    .form-modal-close:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .product-row {
       display: flex; align-items: center; gap: .8rem; background: var(--surface);
       border: 1.5px solid var(--card-border); border-radius: 12px; padding: .7rem .9rem;
@@ -452,20 +495,23 @@
             </div>
           </div>
 
-          <div id="product-form-panel" style="margin-top:1.5rem;">
-          <div class="stats-bar" id="stats-bar">
-            <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Productos</div></div>
-            <div class="stat-card"><div class="stat-num" id="stat-cats">0</div><div class="stat-lbl">Categorías</div></div>
-            <div class="stat-card"><div class="stat-num" id="stat-avgprice">0</div><div class="stat-lbl">Precio Prom.</div></div>
-          </div>
+          <div id="product-form-panel" class="form-modal-overlay" aria-hidden="true">
+            <div class="form-modal">
+              <button class="form-modal-close" id="product-form-close" aria-label="Cerrar">×</button>
 
-          <div class="panel">
-            <div class="panel-title">
-              <span id="form-mode-label">➕ Agregar Producto</span>
-            </div>
+              <div class="stats-bar" id="stats-bar">
+                <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Productos</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-cats">0</div><div class="stat-lbl">Categorías</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-avgprice">0</div><div class="stat-lbl">Precio Prom.</div></div>
+              </div>
 
-            <div class="form-grid">
-              <input type="hidden" id="edit-id" value="" />
+              <div class="panel">
+                <div class="panel-title">
+                  <span id="form-mode-label">➕ Agregar Producto</span>
+                </div>
+
+                <div class="form-grid">
+                  <input type="hidden" id="edit-id" value="" />
 
               <div class="form-row">
                 <div class="field">
@@ -521,12 +567,13 @@
                 </div>
               </div>
 
-              <div class="form-actions">
-                <button class="btn-primary" id="btn-save">Guardar Producto</button>
-                <button class="btn-secondary" id="btn-cancel" style="display:none">Cancelar</button>
+                  <div class="form-actions">
+                    <button class="btn-primary" id="btn-save">Guardar Producto</button>
+                    <button class="btn-secondary" id="btn-cancel" style="display:none">Cancelar</button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </section>
 
@@ -1071,6 +1118,18 @@
     renderCategoryConfig();
   }
 
+  function openProductFormPanel() {
+    const panel = document.getElementById('product-form-panel');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeProductFormPanel() {
+    const panel = document.getElementById('product-form-panel');
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+  }
+
   // ─────────────────────────────────────────────
   //  FORM LOGIC
   // ─────────────────────────────────────────────
@@ -1089,7 +1148,6 @@
     document.getElementById('form-mode-label').textContent = '➕ Agregar Producto';
     document.getElementById('btn-save').textContent = 'Guardar Producto';
     document.getElementById('btn-cancel').style.display = 'none';
-    document.getElementById('product-form-panel').style.display = 'block';
     renderList();
   }
 
@@ -1110,11 +1168,10 @@
     document.getElementById('form-mode-label').textContent = '✏️ Editar Producto';
     document.getElementById('btn-save').textContent = 'Actualizar Producto';
     document.getElementById('btn-cancel').style.display = 'inline-flex';
-    document.getElementById('product-form-panel').style.display = 'block';
     [1,2,3].forEach(n => updateImagePreview(imgs[n-1]||'', n));
     renderList();
+    openProductFormPanel();
     document.getElementById('f-name').focus();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function updateImagePreview(url, n) {
@@ -1169,6 +1226,7 @@
       showToast('✅ Producto agregado');
     }
     clearForm();
+    closeProductFormPanel();
   }
 
   // ─────────────────────────────────────────────
@@ -1201,7 +1259,20 @@
   //  EVENT LISTENERS
   // ─────────────────────────────────────────────
   document.getElementById('btn-save').addEventListener('click', saveProduct);
-  document.getElementById('btn-cancel').addEventListener('click', clearForm);
+  document.getElementById('btn-cancel').addEventListener('click', function() {
+    clearForm();
+    closeProductFormPanel();
+  });
+  document.getElementById('product-form-close').addEventListener('click', function() {
+    clearForm();
+    closeProductFormPanel();
+  });
+  document.getElementById('product-form-panel').addEventListener('click', function(e) {
+    if (e.target === this) {
+      clearForm();
+      closeProductFormPanel();
+    }
+  });
   document.getElementById('confirm-yes').addEventListener('click', confirmDelete);
   document.getElementById('confirm-no').addEventListener('click', closeConfirm);
   document.getElementById('confirm-overlay').addEventListener('click', function(e) {
@@ -1229,9 +1300,8 @@
     clearForm();
     document.querySelectorAll('.side-link').forEach(el => el.classList.toggle('active', el.dataset.section === 'products'));
     document.querySelectorAll('.section-panel').forEach(el => el.classList.toggle('active', el.id === 'section-products'));
-    document.getElementById('product-form-panel').style.display = 'block';
+    openProductFormPanel();
     document.getElementById('f-name').focus();
-    window.scrollTo({ top: document.getElementById('product-form-panel').offsetTop - 20, behavior: 'smooth' });
   });
 
   document.getElementById('btn-add-category').addEventListener('click', addCategoryFromConfig);
@@ -1257,7 +1327,11 @@
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeConfirm();
+    if (e.key === 'Escape') {
+      closeConfirm();
+      clearForm();
+      closeProductFormPanel();
+    }
   });
 
   // ─────────────────────────────────────────────
