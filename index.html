@@ -63,18 +63,6 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .header-right { display: flex; align-items: center; gap: .8rem; }
-    .btn-admin {
-      display: inline-flex; align-items: center; gap: .4rem;
-      padding: .45rem .9rem;
-      font-family: 'Montserrat', sans-serif; font-size: .68rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); text-decoration: none;
-      border: 1px solid var(--card-border); border-radius: 8px;
-      background: transparent;
-      transition: color .2s, border-color .2s;
-    }
-    .btn-admin:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-
     /* ── CART BUTTON ── */
     .cart-btn {
       position: relative;
@@ -174,6 +162,19 @@
     .product-cat {
       font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
       color: var(--accent2); font-weight: 600;
+    }
+    .product-qty {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      font-size: .62rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: .12rem .45rem;
     }
     .product-price {
       display: flex; align-items: baseline; flex-wrap: wrap; gap: .35rem;
@@ -339,8 +340,8 @@
 
     /* ── FOOTER ── */
     .site-footer {
-      background: #ffffff;
-      border-top: 1px solid var(--card-border);
+      background: linear-gradient(180deg, #1b0633 0%, #0f001f 100%);
+      border-top: 1px solid rgba(255,255,255,0.14);
       padding: 2rem 1.5rem;
     }
     .footer-inner {
@@ -350,7 +351,7 @@
     .footer-logo {
       display: flex; align-items: center; gap: .7rem; text-decoration: none;
     }
-    .footer-logo img { width: 34px; opacity: .8; }
+    .footer-logo img { width: 34px; opacity: .82; filter: brightness(0) invert(1); }
     .footer-logo span {
       font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.2rem;
       letter-spacing: .12em; opacity: .9;
@@ -366,9 +367,9 @@
       padding: .7rem 1.4rem;
       font-family: 'Montserrat', sans-serif; font-size: .68rem; font-weight: 700;
       letter-spacing: .12em; text-transform: uppercase;
-      color: var(--text); text-decoration: none; cursor: pointer;
-      border: 1px solid rgba(167,139,250,.35); border-radius: 10px;
-      background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(167,139,250,.06));
+      color: #f3ecff; text-decoration: none; cursor: pointer;
+      border: 1px solid rgba(167,139,250,.45); border-radius: 10px;
+      background: linear-gradient(135deg, rgba(124,58,237,.2), rgba(167,139,250,.1));
       overflow: hidden;
       transition: color .25s, border-color .25s, box-shadow .25s, transform .2s;
     }
@@ -378,21 +379,21 @@
       box-shadow: 0 0 18px rgba(167,139,250,.35);
       transform: translateY(-2px);
     }
-    .f-btn-wa { border-color: rgba(37,211,102,.35); background: linear-gradient(135deg,rgba(37,211,102,.1),rgba(0,200,80,.05)); }
+    .f-btn-wa { border-color: rgba(37,211,102,.45); background: linear-gradient(135deg,rgba(37,211,102,.15),rgba(0,200,80,.08)); }
     .f-btn-wa:hover { border-color: #25d366; box-shadow: 0 0 18px rgba(37,211,102,.4); }
-    .f-btn-cat { border-color: rgba(232,121,249,.35); background: linear-gradient(135deg,rgba(232,121,249,.1),rgba(200,0,240,.05)); }
+    .f-btn-cat { border-color: rgba(232,121,249,.45); background: linear-gradient(135deg,rgba(232,121,249,.16),rgba(200,0,240,.08)); }
     .f-btn-cat:hover { border-color: var(--accent2); box-shadow: 0 0 18px rgba(232,121,249,.35); }
-    .f-btn-of { border-color: rgba(250,180,80,.4); background: linear-gradient(135deg,rgba(250,180,80,.1),rgba(255,120,0,.05)); }
+    .f-btn-of { border-color: rgba(250,180,80,.55); background: linear-gradient(135deg,rgba(250,180,80,.15),rgba(255,120,0,.08)); }
     .f-btn-of:hover { border-color: #f8b400; box-shadow: 0 0 18px rgba(250,180,80,.4); }
     .footer-copy {
       font-size: .65rem; letter-spacing: .18em; text-transform: uppercase;
-      color: rgba(42,22,70,.45); text-align: center;
+      color: rgba(243,236,255,.62); text-align: center;
     }
 
     /* ── MODALS (footer) ── */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(30,16,48,.35);
+      background: rgba(124,58,237,.16);
       backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       z-index: 400; align-items: center; justify-content: center; padding: 1.5rem;
     }
@@ -478,10 +479,6 @@
       <span>CIAM</span>
     </a>
     <div class="header-right">
-      <a href="admin.html" class="btn-admin" title="Panel de administración">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
-        Admin
-      </a>
       <button class="cart-btn" id="cart-btn" aria-label="Ver carrito">
         <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2h2l.4 2M5 13h14l2-8H5.4M5 13L3.4 4H1M5 13l-1.4 6h15"/></svg>
         Carrito
@@ -663,12 +660,12 @@
 
   function getDefaultProducts() {
     return [
-      { id: 1, name: 'Mopa Industrial 120cm', category: 'Mopas', price: 85, discount: 0, description: 'Mopa de microfibra para pisos industriales. Alta absorción.', images: ['','',''] },
-      { id: 2, name: 'Carro de Limpieza Pro', category: 'Carros', price: 320, discount: 0, description: 'Carro de limpieza con escurridor de doble cubo. Ruedas antideslizantes.', images: ['','',''] },
-      { id: 3, name: 'Escoba de Goma', category: 'Escobas', price: 45, discount: 0, description: 'Escoba de goma con mango telescópico. Ideal para agua y residuos.', images: ['','',''] },
-      { id: 4, name: 'Trapeador Giratório 360°', category: 'Mopas', price: 120, discount: 0, description: 'Trapeador con mecanismo giratorio y cubo escurridor automático.', images: ['','',''] },
-      { id: 5, name: 'Balde Escurridor 20L', category: 'Baldes', price: 95, discount: 0, description: 'Balde con escurridor de pedal. Capacidad 20 litros.', images: ['','',''] },
-      { id: 6, name: 'Difusor de Aromas Industrial', category: 'Aromas', price: 210, discount: 0, description: 'Difusor automático para espacios grandes. Recarga cada 30 días.', images: ['','',''] }
+      { id: 1, name: 'Mopa Industrial 120cm', category: 'Mopas', price: 85, quantity: 0, discount: 0, description: 'Mopa de microfibra para pisos industriales. Alta absorción.', images: ['','',''] },
+      { id: 2, name: 'Carro de Limpieza Pro', category: 'Carros', price: 320, quantity: 0, discount: 0, description: 'Carro de limpieza con escurridor de doble cubo. Ruedas antideslizantes.', images: ['','',''] },
+      { id: 3, name: 'Escoba de Goma', category: 'Escobas', price: 45, quantity: 0, discount: 0, description: 'Escoba de goma con mango telescópico. Ideal para agua y residuos.', images: ['','',''] },
+      { id: 4, name: 'Trapeador Giratório 360°', category: 'Mopas', price: 120, quantity: 0, discount: 0, description: 'Trapeador con mecanismo giratorio y cubo escurridor automático.', images: ['','',''] },
+      { id: 5, name: 'Balde Escurridor 20L', category: 'Baldes', price: 95, quantity: 0, discount: 0, description: 'Balde con escurridor de pedal. Capacidad 20 litros.', images: ['','',''] },
+      { id: 6, name: 'Difusor de Aromas Industrial', category: 'Aromas', price: 210, quantity: 0, discount: 0, description: 'Difusor automático para espacios grandes. Recarga cada 30 días.', images: ['','',''] }
     ];
   }
 
@@ -809,7 +806,7 @@
   }
 
   function getStockValue(product) {
-    const raw = Number(product && product.stock);
+    const raw = Number(product && (product.quantity ?? product.stock));
     if (!Number.isFinite(raw)) return 0;
     return Math.max(0, Math.floor(raw));
   }
@@ -847,6 +844,8 @@
       const img0 = (p.images && p.images[0]) || p.image || '';
       const discount = getDiscountValue(p);
       const finalPrice = getEffectivePrice(p);
+      const stock = getStockValue(p);
+      const quantityHtml = stock > 0 ? `<div class="product-qty">Cantidad: ${stock}</div>` : '';
       const priceHtml = discount > 0
         ? `<div class="product-price"><span class="product-price-old">Bs ${Number(p.price).toFixed(2)}</span>Bs ${finalPrice.toFixed(2)} <span>/ unidad</span><span class="product-discount-tag">-${discount}%</span></div>`
         : `<div class="product-price">Bs ${Number(p.price).toFixed(2)} <span>/ unidad</span></div>`;
@@ -861,6 +860,7 @@
           <div class="product-cat">${escapeHtml(p.category)}</div>
           <div class="product-name">${escapeHtml(p.name)}</div>
           <div class="product-desc">${escapeHtml(p.description)}</div>
+          ${quantityHtml}
           ${priceHtml}
         </div>
         <button class="btn-add" data-id="${p.id}">
@@ -881,6 +881,8 @@
     const thumbs = images.slice(1, 4).map(url => `<img src="${escapeHtml(url)}" alt="${escapeHtml(product.name)}" loading="lazy" />`).join('');
     const discount = getDiscountValue(product);
     const finalPrice = getEffectivePrice(product);
+    const stock = getStockValue(product);
+    const stockHtml = stock > 0 ? `<p class="product-detail-stock">Inventario: ${stock} unidades</p>` : '';
     const priceLine = discount > 0
       ? `<div class="product-detail-price"><span class="product-detail-old">Bs ${Number(product.price).toFixed(2)}</span>Bs ${finalPrice.toFixed(2)} <span>/ unidad</span><span class="product-discount-tag">-${discount}%</span></div>`
       : `<div class="product-detail-price">Bs ${Number(product.price).toFixed(2)} <span>/ unidad</span></div>`;
@@ -892,7 +894,7 @@
       <h3 class="product-detail-name">${escapeHtml(product.name)}</h3>
       <p class="product-detail-desc">${escapeHtml(product.description || 'Sin descripción')}</p>
       ${priceLine}
-      <p class="product-detail-stock">Inventario: ${getStockValue(product)} unidades</p>
+      ${stockHtml}
     `;
 
     document.getElementById('modal-product-detail').classList.add('open');
