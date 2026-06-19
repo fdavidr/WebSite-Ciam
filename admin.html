@@ -897,6 +897,7 @@
       showToast('ℹ️ Esa categoría ya existe');
       return;
     }
+    const prevCategories = [..._customCategories];
     _customCategories.push(value);
     _customCategories.sort((a, b) => a.localeCompare(b));
     try {
@@ -906,12 +907,16 @@
       updateCatSuggestions();
       showToast('✅ Categoría agregada');
     } catch (e) {
-      showToast('❌ Error al guardar categoría');
+      console.error('Error al guardar categoría:', e);
+      _customCategories = prevCategories;
+      const isPermission = e && e.code === 'permission-denied';
+      showToast(isPermission ? '❌ Sin permiso: revisa las reglas de Firestore' : '❌ Error al guardar categoría');
     }
   }
 
   async function removeCategoryFromConfig(categoryName) {
     const name = normalizeCategoryName(categoryName);
+    const prevCategories = [..._customCategories];
     _customCategories = _customCategories.filter(c => c !== name);
     try {
       await saveCategoryConfig();
@@ -919,6 +924,8 @@
       updateCatSuggestions();
       showToast('🗑 Categoría eliminada');
     } catch (e) {
+      console.error('Error al eliminar categoría:', e);
+      _customCategories = prevCategories;
       showToast('❌ Error al eliminar categoría');
     }
   }
